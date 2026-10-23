@@ -49,21 +49,37 @@ function PortfolioSite() {
 
 export function App() {
   const [page, setPage] = useState<'site' | 'admin'>(() => {
-    return window.location.hash === '#/admin' ? 'admin' : 'site';
+    const hash = window.location.hash;
+    return hash === '#/admin' || hash === '#admin' ? 'admin' : 'site';
   });
 
   useEffect(() => {
     const handler = () => {
-      setPage(window.location.hash === '#/admin' ? 'admin' : 'site');
+      const hash = window.location.hash;
+      setPage(hash === '#/admin' || hash === '#admin' ? 'admin' : 'site');
     };
     window.addEventListener('hashchange', handler);
     return () => window.removeEventListener('hashchange', handler);
   }, []);
 
-  const goToAdmin = () => {
-    window.location.hash = '#/admin';
-    setPage('admin');
-  };
+  // Shortcut Ctrl+Shift+A (or Cmd+Shift+A) to access admin panel
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        const isAdmin = window.location.hash === '#/admin' || window.location.hash === '#admin';
+        if (isAdmin) {
+          window.location.hash = '';
+          setPage('site');
+        } else {
+          window.location.hash = '#/admin';
+          setPage('admin');
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const goToSite = () => {
     window.location.hash = '';
@@ -75,20 +91,7 @@ export function App() {
       {page === 'admin' ? (
         <AdminDashboard onBack={goToSite} />
       ) : (
-        <>
-          <PortfolioSite />
-          {/* Floating admin button */}
-          <button
-            onClick={goToAdmin}
-            className="fixed bottom-6 right-6 z-[9999] w-12 h-12 rounded-full bg-[#0f172a] hover:bg-[#1e293b] text-white shadow-2xl border border-[#334155] flex items-center justify-center transition-all hover:scale-110 hover:-translate-y-1 group"
-            title="Admin Dashboard"
-          >
-            <svg className="w-5 h-5 group-hover:rotate-90 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
-        </>
+        <PortfolioSite />
       )}
     </PortfolioDataProvider>
   );

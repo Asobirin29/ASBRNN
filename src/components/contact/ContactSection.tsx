@@ -361,7 +361,12 @@ export const ContactSection: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-[#0f172a] text-center sm:text-left">
             <div className="flex items-center justify-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#f59e0b] shrink-0" />
-              <span>&copy; {new Date().getFullYear()} {profileData.name}</span>
+              <span>
+                <a href="#/admin" title="Admin Portal" className="hover:text-[#0284c7] transition-colors cursor-default select-none">
+                  &copy;
+                </a>{' '}
+                {new Date().getFullYear()} {profileData.name}
+              </span>
               <span className="hidden sm:inline text-[#64748b]">•</span>
             </div>
             <span className="text-[10px] sm:text-xs text-[#64748b] sm:text-[#0f172a] font-normal sm:font-bold">
