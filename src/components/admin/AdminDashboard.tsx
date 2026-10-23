@@ -1006,31 +1006,58 @@ const BackupAndSyncTab: React.FC<{
     }
   };
 
+  const isLocal = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
   return (
     <div className="space-y-6">
-      {/* Permanent Save to Source Code */}
-      <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-[#1e293b] to-[#1e293b] border-2 border-emerald-500/40 shadow-xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 mb-2">
-              <Sparkles className="w-3.5 h-3.5" /> REKOMENDASI UTAMA
+      {/* Permanent Save to Source Code or Cloud Notice */}
+      {isLocal ? (
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-[#1e293b] to-[#1e293b] border-2 border-emerald-500/40 shadow-xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 mb-2">
+                <Sparkles className="w-3.5 h-3.5" /> REKOMENDASI UTAMA (LOCAL DEV)
+              </div>
+              <h3 className="text-lg font-bold text-white">Simpan Permanen ke File Code (`portfolioData.ts`)</h3>
+              <p className="text-sm text-[#94a3b8] mt-1 max-w-2xl">
+                Menulis langsung seluruh data kamu ke file <code className="text-sky-300 font-mono text-xs bg-[#0f172a] px-1.5 py-0.5 rounded">src/data/portfolioData.ts</code> di komputer kamu.
+                Data akan menjadi data bawaan proyek, tidak akan hilang meskipun cache browser dibersihkan atau saat proyek di-push ke GitHub dan di-deploy!
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-white">Simpan Permanen ke File Code (`portfolioData.ts`)</h3>
-            <p className="text-sm text-[#94a3b8] mt-1 max-w-2xl">
-              Menulis langsung seluruh data kamu ke file <code className="text-sky-300 font-mono text-xs bg-[#0f172a] px-1.5 py-0.5 rounded">src/data/portfolioData.ts</code> di komputer kamu.
-              Data akan menjadi data bawaan proyek, tidak akan hilang meskipun cache browser dibersihkan atau saat proyek di-push ke GitHub dan di-deploy!
-            </p>
+            <button
+              onClick={onSavePermanent}
+              disabled={isSavingPermanent}
+              className={`${btnSuccess} text-base px-6 py-3 shrink-0 shadow-emerald-500/25`}
+            >
+              <HardDrive className="w-5 h-5" />
+              {isSavingPermanent ? 'Sedang Menyimpan...' : 'Simpan Permanen ke File Code'}
+            </button>
           </div>
-          <button
-            onClick={onSavePermanent}
-            disabled={isSavingPermanent}
-            className={`${btnSuccess} text-base px-6 py-3 shrink-0 shadow-emerald-500/25`}
-          >
-            <HardDrive className="w-5 h-5" />
-            {isSavingPermanent ? 'Sedang Menyimpan...' : 'Simpan Permanen ke File Code'}
-          </button>
         </div>
-      </div>
+      ) : (
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-sky-950/40 via-[#1e293b] to-[#1e293b] border-2 border-sky-500/40 shadow-xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 mb-2">
+                <Sparkles className="w-3.5 h-3.5" /> CLOUD DEPLOYMENT (VERCEL)
+              </div>
+              <h3 className="text-lg font-bold text-white">Penyimpanan Aktif di Browser (LocalStorage)</h3>
+              <p className="text-sm text-[#94a3b8] mt-1 max-w-2xl">
+                Website kamu sedang berjalan di hosting Vercel. Perubahan yang kamu simpan akan langsung aktif di browser ini. Untuk memperbarui website publik secara permanen bagi semua orang: klik <strong className="text-white">"Salin Kode ke Clipboard"</strong> di bawah, tempel di file <code className="text-sky-300 font-mono text-xs bg-[#0f172a] px-1.5 py-0.5 rounded">src/data/portfolioData.ts</code> di komputermu, lalu lakukan <code className="text-emerald-400 font-mono text-xs">git push</code>.
+              </p>
+            </div>
+            <button
+              onClick={onSavePermanent}
+              disabled={isSavingPermanent}
+              className={`${btnSuccess} text-base px-6 py-3 shrink-0 shadow-emerald-500/25`}
+            >
+              <CheckCircle2 className="w-5 h-5" />
+              {isSavingPermanent ? 'Sedang Menyimpan...' : 'Simpan ke Browser'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* JSON Backup & Restore */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1209,6 +1236,9 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
     }
   };
 
+  const isLocal = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
   return (
     <div className="min-h-screen bg-[#0b1120] text-[#e2e8f0]">
       <Toast toast={toast} />
@@ -1241,8 +1271,12 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                 <h1 className="text-base sm:text-lg font-bold text-white tracking-wide">
                   Admin Portfolio Dashboard
                 </h1>
-                <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30">
-                  LIVE EDITOR
+                <span className={`hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  isLocal
+                    ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
+                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                }`}>
+                  {isLocal ? 'LIVE LOCAL' : 'VERCEL LIVE'}
                 </span>
               </div>
               <p className="text-xs text-[#64748b]">Edit dan sesuaikan seluruh data portofolio pribadimu</p>
@@ -1254,10 +1288,12 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
               onClick={handleSavePermanent}
               disabled={isSavingPermanent}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold transition-all hover:-translate-y-0.5 shadow-md shadow-emerald-600/20 cursor-pointer disabled:opacity-50"
-              title="Simpan data ke src/data/portfolioData.ts"
+              title={isLocal ? "Simpan data ke src/data/portfolioData.ts" : "Simpan perubahan ke browser (localStorage)"}
             >
-              <HardDrive className="w-4 h-4" />
-              <span className="hidden sm:inline">{isSavingPermanent ? 'Menyimpan...' : 'Simpan ke File Code'}</span>
+              {isLocal ? <HardDrive className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+              <span className="hidden sm:inline">
+                {isSavingPermanent ? 'Menyimpan...' : (isLocal ? 'Simpan ke File Code' : 'Simpan Data')}
+              </span>
             </button>
 
             <button

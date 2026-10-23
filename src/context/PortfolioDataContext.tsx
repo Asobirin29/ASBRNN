@@ -154,16 +154,32 @@ export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, nul
   }, [profile, projects, techStack, experience]);
 
   const savePermanentToCode = useCallback(async (): Promise<{ success: boolean; message?: string; error?: string }> => {
+    const isLocal = typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+    if (!isLocal) {
+      // In cloud static hosting (like Vercel), changes are stored in localStorage
+      return {
+        success: true,
+        message: 'Perubahan berhasil disimpan ke browser (localStorage)! Karena sedang di Vercel (hosting statis), gunakan tab "Simpan & Backup" untuk menyalin kode TypeScript jika ingin meng-update permanen ke repo GitHub.',
+      };
+    }
+
     try {
       const res = await fetch('/api/save-portfolio-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ profile, projects, techStack, experience }),
       });
-      const json = await res.json();
-      return json;
+      const text = await res.text();
+      try {
+        const json = JSON.parse(text);
+        return json;
+      } catch {
+        return { success: false, error: 'Server dev lokal tidak mengembalikan format JSON yang valid.' };
+      }
     } catch (err: any) {
-      return { success: false, error: err.message || 'Gagal menyimpan ke file source code' };
+      return { success: false, error: err.message || 'Gagal menyimpan ke file source code lokal' };
     }
   }, [profile, projects, techStack, experience]);
 
@@ -172,6 +188,15 @@ export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, nul
       const reader = new FileReader();
       reader.onload = async () => {
         const base64Data = reader.result as string;
+        const isLocal = typeof window !== 'undefined' &&
+          (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+        if (!isLocal) {
+          // On cloud static host (Vercel), store directly as base64 Data URL in browser
+          resolve({ success: true, url: base64Data });
+          return;
+        }
+
         try {
           const res = await fetch('/api/upload-image', {
             method: 'POST',
@@ -179,12 +204,16 @@ export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, nul
             body: JSON.stringify({ filename: file.name, base64Data }),
           });
           if (res.ok) {
-            const data = await res.json();
-            resolve({ success: true, url: data.url });
-          } else {
-            // Fallback to base64 Data URL if upload endpoint fails (e.g. static host)
-            resolve({ success: true, url: base64Data });
+            const text = await res.text();
+            try {
+              const data = JSON.parse(text);
+              resolve({ success: true, url: data.url });
+              return;
+            } catch {
+              // fallback
+            }
           }
+          resolve({ success: true, url: base64Data });
         } catch {
           // Fallback to base64 Data URL
           resolve({ success: true, url: base64Data });
