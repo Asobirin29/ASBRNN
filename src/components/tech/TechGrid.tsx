@@ -2,16 +2,19 @@ import React, { useState } from 'react';
 import { Layers } from 'lucide-react';
 import type { Project, TechItem, TechLayer } from '../../types/portfolio';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { useTheme } from '../../context/ThemeContext';
 import { PipelineFlowPresets, type FlowDomainId } from './PipelineFlowPresets';
 import { PipelineNodeLayer } from './PipelineNodeLayer';
 import { PipelineInspector } from './PipelineInspector';
 import { TechBeachDecorations } from './TechBeachDecorations';
+import { SquidwardTech } from '../spongebob/SquidwardTech';
 
 interface TechGridProps {
   onOpenProject?: (project: Project) => void;
 }
 
 export const TechGrid: React.FC<TechGridProps> = ({ onOpenProject }) => {
+  const { isSunset } = useTheme();
   const { techStack: techStackData, projects: projectsData } = usePortfolioData();
   const [activeDomain, setActiveDomain] = useState<FlowDomainId>('all');
   const [selectedLayer, setSelectedLayer] = useState<TechLayer>('client');
@@ -55,33 +58,67 @@ export const TechGrid: React.FC<TechGridProps> = ({ onOpenProject }) => {
   };
 
   return (
-    <section id="stack" className="relative z-20 -mt-1 w-full bg-[#fff9d4] select-none">
+    <section
+      id="stack"
+      className={`relative scroll-mt-24 z-20 -mt-1 w-full select-none transition-colors duration-500 ${
+        isSunset ? 'bg-[#190f26]' : 'bg-[#fff9d4]'
+      }`}
+    >
       {/* background decorations */}
       <TechBeachDecorations />
 
       {/* content wrapper */}
-      <div className="relative z-10 pt-28 pb-24 max-w-7xl mx-auto px-6 sm:px-12">
+      <div className="relative z-10 pt-32 pb-24 sm:pt-36 sm:pb-28 max-w-7xl mx-auto px-6 sm:px-12">
         {/* header */}
-        <div className="space-y-4 pb-8 border-b-2 border-[#0f172a]/15">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#fde047] text-[#0f172a] text-xs font-mono font-black border-2 border-[#0f172a] shadow-[3px_3px_0px_#0f172a] w-fit">
+        <div
+          className={`space-y-4 pb-8 border-b-2 ${
+            isSunset ? 'border-orange-500/25' : 'border-[#0f172a]/15'
+          }`}
+        >
+          <div
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono font-black border-2 w-fit ${
+              isSunset
+                ? 'bg-[#ea580c] text-white border-orange-400 shadow-[3px_3px_0px_#f97316]'
+                : 'bg-[#fde047] text-[#0f172a] border-[#0f172a] shadow-[3px_3px_0px_#0f172a]'
+            }`}
+          >
             <span>03 // TECH STACK</span>
           </div>
 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
             <div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f172a] tracking-tight leading-[1.08]">
-                Tech Stack & Tools
+              <h2
+                className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.08] ${
+                  isSunset ? 'text-white' : 'text-[#0f172a]'
+                }`}
+              >
+                Tech Stack &amp; Tools
               </h2>
-              <p className="text-sm sm:text-base font-medium text-[#475569] mt-2 max-w-2xl leading-relaxed">
+              <p
+                className={`text-sm sm:text-base font-medium mt-2 max-w-2xl leading-relaxed ${
+                  isSunset ? 'text-slate-300' : 'text-[#475569]'
+                }`}
+              >
                 Teknologi dan tools yang saya gunakan untuk membangun aplikasi web dan mobile.
               </p>
             </div>
 
-            <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#fffdf5] border-2 border-[#0f172a] shadow-[3px_3px_0px_#0f172a] shrink-0 self-start lg:self-auto">
-              <Layers className="w-4 h-4 text-[#0284c7]" />
-              <span className="text-xs font-mono font-bold text-[#0f172a]">
-                {techStackData.length} Tools & Frameworks
-              </span>
+            <div className="flex items-center gap-4 shrink-0 self-start lg:self-auto">
+              {/* Squidward Tentacles with Clarinet */}
+              <SquidwardTech />
+
+              <div
+                className={`flex items-center gap-2 px-4 py-2 rounded-2xl border-2 ${
+                  isSunset
+                    ? 'bg-[#231333] border-orange-500/40 shadow-[3px_3px_0px_#ea580c]'
+                    : 'bg-[#fffdf5] border-[#0f172a] shadow-[3px_3px_0px_#0f172a]'
+                }`}
+              >
+                <Layers className={`w-4 h-4 ${isSunset ? 'text-amber-400' : 'text-[#0284c7]'}`} />
+                <span className={`text-xs font-mono font-bold ${isSunset ? 'text-amber-200' : 'text-[#0f172a]'}`}>
+                  {techStackData.length} Tools &amp; Frameworks
+                </span>
+              </div>
             </div>
           </div>
         </div>

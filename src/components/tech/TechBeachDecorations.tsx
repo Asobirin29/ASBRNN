@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 
 export const TechBeachDecorations: React.FC = () => {
+  const { isSunset } = useTheme();
+
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0">
       <div className="absolute inset-0 w-full h-full">
@@ -14,19 +17,19 @@ export const TechBeachDecorations: React.FC = () => {
         >
           <path
             d="M-50,0 C320,110 580,30 920,120 C1240,210 1380,80 1500,140 L1500,900 L-50,900 Z"
-            fill="#fcf3d1"
+            fill={isSunset ? '#251336' : '#fcf3d1'}
             opacity="0.85"
           />
 
           <path
             d="M-50,220 C280,350 640,190 980,320 C1260,420 1420,280 1500,340 L1500,900 L-50,900 Z"
-            fill="#f6e8ba"
+            fill={isSunset ? '#1f0d2c' : '#f6e8ba'}
             opacity="0.8"
           />
 
           <path
             d="M-50,480 C360,390 740,560 1080,440 C1320,360 1440,500 1500,470 L1500,900 L-50,900 Z"
-            fill="#f0dc9f"
+            fill={isSunset ? '#180a22' : '#f0dc9f'}
             opacity="0.75"
           />
         </svg>

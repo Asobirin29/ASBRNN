@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 
 const SEAGULL_DIALOGUES = [
   'Kwekk! Ada kentang goreng ga di bawah?',
@@ -11,6 +12,16 @@ const SEAGULL_DIALOGUES = [
   'Langit cerah banget buat terbang santai di atas pantai ~',
   'Arus angin hari ini enak banget buat meluncur!',
   'Portofolio yang keren terlihat jelas dari atas awan sini!'
+];
+
+const SEAGULL_SUNSET_DIALOGUES = [
+  'Kwekk! Langit senjanya jingga keemasan gini romantis banget ~',
+  'Matahari terbenam di ufuk laut, syahdu pol!',
+  'Pertandingan voli kepiting selesai, saatnya santai sunsetan!',
+  'Dari atas sini pantulan cahaya emas di air laut keren parah!',
+  'Kwekk! Ada jagung bakar atau cilok anget ga di pantai senja ini?',
+  'Angin senja pantai adem banget buat terbang santai ~',
+  'Siluet pohon kelapa pas sunset estetik banget buat diabadikan!'
 ];
 
 const createShuffledDeck = (items: string[], lastItem?: string): string[] => {
@@ -32,6 +43,7 @@ const ALTITUDE_ZONES = [
 ];
 
 export const FlyingSeagull: React.FC = () => {
+  const { isSunset } = useTheme();
   const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
   const [altitudePercent, setAltitudePercent] = useState<number>(14);
   const [currentQuip, setCurrentQuip] = useState<string | null>(null);
@@ -39,10 +51,31 @@ export const FlyingSeagull: React.FC = () => {
   const x = useMotionValue(-160);
   const seagullRef = useRef<HTMLDivElement | null>(null);
 
-  const deckRef = useRef<string[]>(createShuffledDeck(SEAGULL_DIALOGUES));
+  const deckRef = useRef<string[]>(createShuffledDeck(isSunset ? SEAGULL_SUNSET_DIALOGUES : SEAGULL_DIALOGUES));
   const lastQuipRef = useRef<string>('');
 
   useEffect(() => {
+    deckRef.current = createShuffledDeck(isSunset ? SEAGULL_SUNSET_DIALOGUES : SEAGULL_DIALOGUES);
+  }, [isSunset]);
+
+  const [isInView, setIsInView] = useState<boolean>(true);
+
+  useEffect(() => {
+    const el = seagullRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.02 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isInView) return;
+
     let animId: number;
     let lastTime = performance.now();
 
@@ -87,7 +120,7 @@ export const FlyingSeagull: React.FC = () => {
 
     animId = requestAnimationFrame(flightLoop);
     return () => cancelAnimationFrame(animId);
-  }, [direction, x]);
+  }, [direction, isInView, x]);
 
   useEffect(() => {
     const quipInterval = setInterval(() => {
@@ -172,6 +205,7 @@ export const FlyingSeagull: React.FC = () => {
             <circle cx="44.5" cy="19.5" r="0.6" fill="#FFFFFF" />
 
             <motion.path
+              d="M22 22 C26 6, 36 2, 44 4 C36 12, 30 18, 22 22 Z"
               animate={{
                 d: [
                   'M22 22 C26 6, 36 2, 44 4 C36 12, 30 18, 22 22 Z',
@@ -201,9 +235,11 @@ export const FlyingSeagull: React.FC = () => {
               initial={{ opacity: 0, scale: 0.75, y: 6 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.75, y: 6 }}
-              className={`absolute -top-9 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/95 text-[#0284c7] text-[11px] font-bold shadow-lg border border-[#38bdf8] whitespace-nowrap backdrop-blur-xs flex items-center gap-1 ${
-                direction === 'rtl' ? '-scale-x-100' : 'scale-x-100'
-              }`}
+              className={`absolute -top-9 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[11px] font-bold shadow-lg whitespace-nowrap backdrop-blur-xs flex items-center gap-1 ${
+                isSunset
+                  ? 'bg-[#25122e]/95 text-amber-300 border border-orange-400 shadow-[0_4px_16px_rgba(249,115,22,0.45)]'
+                  : 'bg-white/95 text-[#0284c7] border border-[#38bdf8]'
+              } ${direction === 'rtl' ? '-scale-x-100' : 'scale-x-100'}`}
             >
               <span>{currentQuip}</span>
             </motion.div>

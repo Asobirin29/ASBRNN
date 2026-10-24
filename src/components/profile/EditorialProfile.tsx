@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform, useSpring, type Variants } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 import { FloodWaveOverlay } from './FloodWaveOverlay';
 import { ProfileDuneBackground } from './ProfileDuneBackground';
 import { ProfilePhotoCard } from './ProfilePhotoCard';
 import { ArchitectureStage } from './ArchitectureStage';
 import { FloodActionButton } from './FloodActionButton';
 import { RebuildConstructionOverlay } from './RebuildConstructionOverlay';
+import { PatrickStarBeach } from '../spongebob/PatrickStarBeach';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -64,6 +66,7 @@ const headerRevealVariants: Variants = {
 };
 
 export const EditorialProfile: React.FC = () => {
+  const { isSunset } = useTheme();
   const sectionRef = useRef<HTMLElement | null>(null);
 
   // Flood & Rebuild State Machine
@@ -130,7 +133,9 @@ export const EditorialProfile: React.FC = () => {
     <section
       id="about"
       ref={sectionRef}
-      className="relative pt-24 pb-32 sm:pt-28 sm:pb-44 bg-[#fff9d4] overflow-hidden select-none"
+      className={`relative scroll-mt-24 pt-28 pb-32 sm:pt-36 sm:pb-48 overflow-hidden select-none transition-colors duration-500 ${
+        isSunset ? 'bg-[#190f26]' : 'bg-[#fff9d4]'
+      }`}
     >
       <RebuildConstructionOverlay
         isRebuilding={floodState === 'rebuilding'}
@@ -152,13 +157,23 @@ export const EditorialProfile: React.FC = () => {
         {/* Editorial Section Header & Flood Action Controls */}
         <motion.div
           variants={headerRevealVariants}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 sm:pb-14 border-b border-[#e2d3b3]"
+          className={`flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 sm:pb-14 border-b ${
+            isSunset ? 'border-orange-500/25' : 'border-[#e2d3b3]'
+          }`}
         >
           <div className="max-w-2xl">
-            <span className="text-xs font-mono font-bold uppercase tracking-[0.25em] text-[#8c6239] block mb-2">
+            <span
+              className={`text-xs font-mono font-bold uppercase tracking-[0.25em] block mb-2 ${
+                isSunset ? 'text-amber-400' : 'text-[#8c6239]'
+              }`}
+            >
               Profil &amp; Keahlian
             </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-[#0f172a] tracking-tight leading-[1.08]">
+            <h2
+              className={`text-3xl sm:text-5xl font-black tracking-tight leading-[1.08] ${
+                isSunset ? 'text-[#f8fafc]' : 'text-[#0f172a]'
+              }`}
+            >
               Fullstack &amp; Mobile Developer
             </h2>
           </div>
@@ -171,7 +186,11 @@ export const EditorialProfile: React.FC = () => {
               onTriggerRebuild={handleTriggerRebuild}
             />
 
-            <p className="max-w-xs text-xs text-[#475569] leading-relaxed">
+            <p
+              className={`max-w-xs text-xs leading-relaxed ${
+                isSunset ? 'text-slate-300' : 'text-[#475569]'
+              }`}
+            >
               Berpengalaman mengembangkan aplikasi web skala penuh, aplikasi mobile, arsitektur database, serta manajemen infrastruktur Linux.
             </p>
           </div>
@@ -195,6 +214,11 @@ export const EditorialProfile: React.FC = () => {
             <ArchitectureStage isFlooded={isFlooded} />
           </motion.div>
         </div>
+
+        {/* Patrick Star sunbathing & chilling on the beach dune */}
+        <div className="mt-8 sm:mt-12 flex justify-end pr-2 sm:pr-8">
+          <PatrickStarBeach />
+        </div>
       </motion.div>
 
       <div className="absolute bottom-0 inset-x-0 h-24 sm:h-32 pointer-events-none z-20 overflow-hidden">
@@ -207,12 +231,12 @@ export const EditorialProfile: React.FC = () => {
         >
           <path
             d="M0,80 Q380,25 760,75 T1440,50 L1440,180 L0,180 Z"
-            fill={isFlooded ? '#dfcca8' : '#ebdcae'}
+            fill={isSunset ? '#26133a' : isFlooded ? '#dfcca8' : '#ebdcae'}
             opacity="0.95"
           />
           <path
             d="M0,105 Q420,60 820,100 T1440,85 L1440,180 L0,180 Z"
-            fill={isFlooded ? '#c4ad82' : '#dfcca8'}
+            fill={isSunset ? '#1d0e2e' : isFlooded ? '#c4ad82' : '#dfcca8'}
           />
         </svg>
       </div>

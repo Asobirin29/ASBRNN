@@ -7,28 +7,49 @@ export function renderWaterBody(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
-  depthLevel: 1 | 2 | 3 | 4
+  depthLevel: 1 | 2 | 3 | 4,
+  isSunset: boolean = false
 ): void {
   let waterTop = '#38bdf8';
   let waterMid = '#0284c7';
   let waterBottom = '#02587a';
 
-  if (depthLevel === 1) {
-    waterTop = '#38bdf8';
-    waterMid = '#0284c7';
-    waterBottom = '#0369a1';
-  } else if (depthLevel === 2) {
-    waterTop = '#38bdf8';
-    waterMid = '#0284c7';
-    waterBottom = '#02587a';
-  } else if (depthLevel === 3) {
-    waterTop = '#0284c7';
-    waterMid = '#02587a';
-    waterBottom = '#01283a';
+  if (isSunset) {
+    if (depthLevel === 1) {
+      waterTop = '#4a1236';
+      waterMid = '#881337';
+      waterBottom = '#ea580c';
+    } else if (depthLevel === 2) {
+      waterTop = '#3b113c';
+      waterMid = '#6b183f';
+      waterBottom = '#9a3412';
+    } else if (depthLevel === 3) {
+      waterTop = '#270c2e';
+      waterMid = '#4a1236';
+      waterBottom = '#2a0a2e';
+    } else {
+      waterTop = '#1a0720';
+      waterMid = '#2a0c30';
+      waterBottom = '#120417';
+    }
   } else {
-    waterTop = '#02587a';
-    waterMid = '#024968';
-    waterBottom = '#023850';
+    if (depthLevel === 1) {
+      waterTop = '#38bdf8';
+      waterMid = '#0284c7';
+      waterBottom = '#0369a1';
+    } else if (depthLevel === 2) {
+      waterTop = '#38bdf8';
+      waterMid = '#0284c7';
+      waterBottom = '#02587a';
+    } else if (depthLevel === 3) {
+      waterTop = '#0284c7';
+      waterMid = '#02587a';
+      waterBottom = '#01283a';
+    } else {
+      waterTop = '#02587a';
+      waterMid = '#024968';
+      waterBottom = '#023850';
+    }
   }
 
   const waterGrad = ctx.createLinearGradient(0, 0, 0, height);
@@ -37,6 +58,20 @@ export function renderWaterBody(
   waterGrad.addColorStop(1, waterBottom);
   ctx.fillStyle = waterGrad;
   ctx.fillRect(0, 0, width, height);
+
+  // Sunset shimmering ambient rays / embers
+  if (isSunset) {
+    ctx.save();
+    for (let i = 0; i < 6; i++) {
+      const emberX = (width * 0.16 * i + Math.sin(depthLevel + i) * 30 + width) % width;
+      const emberY = height * 0.2 + (i % 3) * (height * 0.25);
+      ctx.beginPath();
+      ctx.arc(emberX, emberY, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(254, 215, 170, 0.45)';
+      ctx.fill();
+    }
+    ctx.restore();
+  }
 }
 
 export function renderSandLayers(
@@ -44,7 +79,8 @@ export function renderSandLayers(
   width: number,
   height: number,
   depthLevel: 1 | 2 | 3 | 4,
-  time: number
+  time: number,
+  isSunset: boolean = false
 ): WaterBounds {
   let waterMinY = 0;
   let waterMaxY = height;
@@ -55,11 +91,18 @@ export function renderSandLayers(
 
     ctx.save();
     const topSandGrad = ctx.createLinearGradient(0, 0, 0, topSandHeight);
-    topSandGrad.addColorStop(0, '#dfcca8');
-    topSandGrad.addColorStop(0.25, '#ebdcae');
-    topSandGrad.addColorStop(0.55, '#f6e8ba');
-    topSandGrad.addColorStop(0.80, '#faeed1');
-    topSandGrad.addColorStop(1.0, '#fff9d4');
+    if (isSunset) {
+      topSandGrad.addColorStop(0, '#2e1442');
+      topSandGrad.addColorStop(0.3, '#261036');
+      topSandGrad.addColorStop(0.7, '#210d2e');
+      topSandGrad.addColorStop(1.0, '#190f26');
+    } else {
+      topSandGrad.addColorStop(0, '#dfcca8');
+      topSandGrad.addColorStop(0.25, '#ebdcae');
+      topSandGrad.addColorStop(0.55, '#f6e8ba');
+      topSandGrad.addColorStop(0.80, '#faeed1');
+      topSandGrad.addColorStop(1.0, '#fff9d4');
+    }
     ctx.fillStyle = topSandGrad;
 
     // coastal shoreline fill
@@ -89,7 +132,7 @@ export function renderSandLayers(
       if (x === 0) ctx.moveTo(x, sy);
       else ctx.lineTo(x, sy);
     }
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = isSunset ? 'rgba(254, 240, 138, 0.95)' : '#ffffff';
     ctx.lineWidth = 4.5;
     ctx.stroke();
 
@@ -100,10 +143,17 @@ export function renderSandLayers(
 
     ctx.save();
     const bottomSandGrad = ctx.createLinearGradient(0, bottomSandY, 0, height);
-    bottomSandGrad.addColorStop(0, '#f0dc9f');
-    bottomSandGrad.addColorStop(0.3, '#f6e8ba');
-    bottomSandGrad.addColorStop(0.7, '#fcf3d1');
-    bottomSandGrad.addColorStop(1.0, '#fff9d4');
+    if (isSunset) {
+      bottomSandGrad.addColorStop(0, '#1c0a24');
+      bottomSandGrad.addColorStop(0.3, '#240d30');
+      bottomSandGrad.addColorStop(0.7, '#2e1442');
+      bottomSandGrad.addColorStop(1.0, '#190f26');
+    } else {
+      bottomSandGrad.addColorStop(0, '#f0dc9f');
+      bottomSandGrad.addColorStop(0.3, '#f6e8ba');
+      bottomSandGrad.addColorStop(0.7, '#fcf3d1');
+      bottomSandGrad.addColorStop(1.0, '#fff9d4');
+    }
     ctx.fillStyle = bottomSandGrad;
 
     // seabed sand fill
@@ -133,7 +183,7 @@ export function renderSandLayers(
       if (x === 0) ctx.moveTo(x, sy);
       else ctx.lineTo(x, sy);
     }
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = isSunset ? 'rgba(254, 215, 170, 0.85)' : '#ffffff';
     ctx.lineWidth = 4;
     ctx.stroke();
 
@@ -148,7 +198,8 @@ export function renderWaterWaves(
   width: number,
   waterMinY: number,
   waterMaxY: number,
-  time: number
+  time: number,
+  isSunset: boolean = false
 ): void {
   const wave1Y = waterMinY + (waterMaxY - waterMinY) * 0.35;
   ctx.save();
@@ -161,7 +212,7 @@ export function renderWaterWaves(
     if (x === 0) ctx.moveTo(x, cy);
     else ctx.lineTo(x, cy);
   }
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+  ctx.strokeStyle = isSunset ? 'rgba(254, 215, 170, 0.65)' : 'rgba(255, 255, 255, 0.65)';
   ctx.lineWidth = 2.8;
   ctx.stroke();
   ctx.restore();
@@ -177,7 +228,7 @@ export function renderWaterWaves(
     if (x === 0) ctx.moveTo(x, cy);
     else ctx.lineTo(x, cy);
   }
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+  ctx.strokeStyle = isSunset ? 'rgba(251, 146, 60, 0.45)' : 'rgba(255, 255, 255, 0.45)';
   ctx.lineWidth = 2.4;
   ctx.stroke();
   ctx.restore();
@@ -188,11 +239,12 @@ export function renderBubbles(
   width: number,
   waterMinY: number,
   waterMaxY: number,
-  time: number
+  time: number,
+  isSunset: boolean = false
 ): void {
   ctx.save();
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-  ctx.strokeStyle = '#0f172a';
+  ctx.fillStyle = isSunset ? 'rgba(254, 240, 138, 0.65)' : 'rgba(255, 255, 255, 0.7)';
+  ctx.strokeStyle = isSunset ? '#2a0a2e' : '#0f172a';
   ctx.lineWidth = 1.2;
 
   const waterHeight = waterMaxY - waterMinY;

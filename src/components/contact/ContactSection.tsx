@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { useClipboard } from '../../hooks/useClipboard';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { useTheme } from '../../context/ThemeContext';
+import { SandyCheeks } from '../spongebob/SandyCheeks';
 import { ContactOceanCanvas } from './ContactOceanCanvas';
 
 const inquiryTopics = [
@@ -25,6 +27,7 @@ const inquiryTopics = [
 ];
 
 export const ContactSection: React.FC = () => {
+  const { isSunset } = useTheme();
   const { profile: profileData } = usePortfolioData();
   const { copied, copy } = useClipboard();
   const [selectedTopic, setSelectedTopic] = useState(inquiryTopics[0]);
@@ -70,7 +73,9 @@ export const ContactSection: React.FC = () => {
   return (
     <section
       id="contact"
-      className="relative z-20 -mt-1 w-full bg-[#02587a] select-none py-24 overflow-hidden text-[#0f172a]"
+      className={`relative z-20 -mt-1 w-full ${
+        isSunset ? 'bg-[#1c0d2b] text-white' : 'bg-[#02587a] text-[#0f172a]'
+      } select-none py-24 scroll-mt-24 overflow-hidden transition-colors duration-500`}
     >
       <ContactOceanCanvas />
 
@@ -132,28 +137,50 @@ export const ContactSection: React.FC = () => {
             stiffness: 220,
             damping: 24
           }}
-          className="p-5 sm:p-12 rounded-[24px] sm:rounded-[36px] bg-[#fffdf5] border-2 sm:border-3 border-[#0f172a] shadow-[6px_6px_0px_#0f172a] sm:shadow-[10px_10px_0px_#0f172a] space-y-5 sm:space-y-8"
+          className={`p-5 sm:p-12 rounded-[24px] sm:rounded-[36px] border-2 sm:border-3 space-y-5 sm:space-y-8 transition-colors duration-500 ${
+            isSunset
+              ? 'bg-[#200d33] border-orange-500/40 shadow-[6px_6px_0px_#ea580c] sm:shadow-[10px_10px_0px_#ea580c]'
+              : 'bg-[#fffdf5] border-[#0f172a] shadow-[6px_6px_0px_#0f172a] sm:shadow-[10px_10px_0px_#0f172a]'
+          }`}
         >
           {/* header */}
           <div className="space-y-3 sm:space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
-              <div className="flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-[#fde047] text-[#0f172a] text-xs font-mono font-black border-2 border-[#0f172a] shadow-[2px_2px_0px_#0f172a] sm:shadow-[3px_3px_0px_#0f172a] w-fit">
+              <div className={`flex items-center gap-2 px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl text-xs font-mono font-black border-2 w-fit ${
+                isSunset
+                  ? 'bg-[#ea580c] text-white border-orange-400 shadow-[2px_2px_0px_#ea580c]'
+                  : 'bg-[#fde047] text-[#0f172a] border-[#0f172a] shadow-[2px_2px_0px_#0f172a]'
+              }`}>
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>KONTAK</span>
               </div>
 
-              <div className="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-lg sm:rounded-xl bg-[#dcfce7] border-2 border-[#0f172a] text-[10px] sm:text-xs font-mono font-black text-[#15803d] shadow-[2px_2px_0px_#0f172a]">
+              <div className={`px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-lg sm:rounded-xl border-2 text-[10px] sm:text-xs font-mono font-black shadow-[2px_2px_0px_#0f172a] ${
+                isSunset
+                  ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300'
+                  : 'bg-[#dcfce7] border-[#0f172a] text-[#15803d]'
+              }`}>
                 STATUS: TERSEDIA
               </div>
             </div>
 
-            <div className="space-y-1 sm:space-y-2">
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-[#0f172a] tracking-tight leading-[1.08]">
-                Mari Berdiskusi &amp; Berkolaborasi
-              </h2>
-              <p className="text-xs sm:text-base text-[#475569] font-medium leading-relaxed max-w-2xl">
-                Punya ide proyek, kebutuhan rekayasa web/mobile, atau peluang kolaborasi? Hubungi saya langsung melalui email dan topik di bawah.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-1 sm:space-y-2">
+                <h2 className={`text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.08] ${
+                  isSunset ? 'text-white' : 'text-[#0f172a]'
+                }`}>
+                  Mari Berdiskusi &amp; Berkolaborasi
+                </h2>
+                <p className={`text-xs sm:text-base font-medium leading-relaxed max-w-2xl ${
+                  isSunset ? 'text-purple-200/90' : 'text-[#475569]'
+                }`}>
+                  Punya ide proyek, kebutuhan rekayasa web/mobile, atau peluang kolaborasi? Hubungi saya langsung melalui email dan topik di bawah.
+                </p>
+              </div>
+
+              <div className="shrink-0 self-center sm:self-end">
+                <SandyCheeks />
+              </div>
             </div>
           </div>
 
@@ -165,10 +192,16 @@ export const ContactSection: React.FC = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: 0.15 }}
-              className="md:col-span-7 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[#fff9d4] border-2 border-[#0f172a] shadow-[3px_3px_0px_#0f172a] sm:shadow-[4px_4px_0px_#0f172a] flex flex-col justify-between space-y-4 sm:space-y-5"
+              className={`md:col-span-7 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 flex flex-col justify-between space-y-4 sm:space-y-5 transition-colors ${
+                isSunset
+                  ? 'bg-[#2b1040] border-orange-500/40 shadow-[3px_3px_0px_#ea580c] sm:shadow-[4px_4px_0px_#ea580c]'
+                  : 'bg-[#fff9d4] border-[#0f172a] shadow-[3px_3px_0px_#0f172a] sm:shadow-[4px_4px_0px_#0f172a]'
+              }`}
             >
               <div className="space-y-2.5 sm:space-y-3">
-                <div className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#64748b]">
+                <div className={`text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider ${
+                  isSunset ? 'text-purple-300' : 'text-[#64748b]'
+                }`}>
                   Pilih Topik Diskusi
                 </div>
 
@@ -183,8 +216,12 @@ export const ContactSection: React.FC = () => {
                         onClick={() => setSelectedTopic(topic)}
                         className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-mono font-bold border-2 transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-[#0284c7] text-white border-[#0f172a] shadow-[2px_2px_0px_#0f172a]'
-                            : 'bg-[#fffdf5] text-[#0f172a] border-[#0f172a] shadow-[1.5px_1.5px_0px_#0f172a] hover:bg-[#fde047]'
+                            ? isSunset
+                              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-300 shadow-[2px_2px_0px_#ea580c]'
+                              : 'bg-[#0284c7] text-white border-[#0f172a] shadow-[2px_2px_0px_#0f172a]'
+                            : isSunset
+                              ? 'bg-[#3b1554] text-amber-200 border-orange-500/40 shadow-[1.5px_1.5px_0px_#ea580c] hover:bg-[#ff7b00] hover:text-[#150720]'
+                              : 'bg-[#fffdf5] text-[#0f172a] border-[#0f172a] shadow-[1.5px_1.5px_0px_#0f172a] hover:bg-[#fde047]'
                         }`}
                       >
                         {topic.label}
@@ -195,7 +232,7 @@ export const ContactSection: React.FC = () => {
               </div>
 
               {/* send email and copy button group */}
-              <div className="space-y-2 pt-2 border-t-2 border-[#0f172a]/10">
+              <div className={`space-y-2 pt-2 border-t-2 ${isSunset ? 'border-orange-500/20' : 'border-[#0f172a]/10'}`}>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full">
                   <a
                     href={mailtoLink}
@@ -208,21 +245,25 @@ export const ContactSection: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => copy(profileData.contact.email)}
-                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl bg-[#fffdf5] hover:bg-[#fde047] text-[#0f172a] font-mono font-bold text-xs sm:text-sm transition-all cursor-pointer border-2 border-[#0f172a] shadow-[2px_2px_0px_#0f172a] w-full sm:w-auto shrink-0 whitespace-nowrap"
+                    className={`inline-flex items-center justify-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl font-mono font-bold text-xs sm:text-sm transition-all cursor-pointer border-2 w-full sm:w-auto shrink-0 whitespace-nowrap ${
+                      isSunset
+                        ? 'bg-[#3b1554] hover:bg-[#ff7b00] text-amber-200 hover:text-[#150720] border-orange-500/40 shadow-[2px_2px_0px_#ea580c]'
+                        : 'bg-[#fffdf5] hover:bg-[#fde047] text-[#0f172a] border-[#0f172a] shadow-[2px_2px_0px_#0f172a]'
+                    }`}
                     title="Salin alamat email"
                   >
-                    <Mail className="w-4 h-4 text-[#0284c7] shrink-0" />
+                    <Mail className={`w-4 h-4 ${isSunset ? 'text-amber-400' : 'text-[#0284c7]'} shrink-0`} />
                     <span>{profileData.contact.email}</span>
                     {copied ? (
-                      <Check className="w-4 h-4 text-[#15803d] ml-1 shrink-0" />
+                      <Check className="w-4 h-4 text-emerald-400 ml-1 shrink-0" />
                     ) : (
-                      <Copy className="w-4 h-4 text-[#64748b] ml-1 shrink-0" />
+                      <Copy className={`w-4 h-4 ${isSunset ? 'text-purple-300' : 'text-[#64748b]'} ml-1 shrink-0`} />
                     )}
                   </button>
                 </div>
 
                 {copied && (
-                  <div className="text-xs font-mono font-bold text-[#15803d] flex items-center gap-1.5 animate-fadeIn">
+                  <div className="text-xs font-mono font-bold text-emerald-400 flex items-center gap-1.5 animate-fadeIn">
                     <Check className="w-3.5 h-3.5" />
                     <span>Email berhasil disalin ke clipboard!</span>
                   </div>
@@ -248,34 +289,50 @@ export const ContactSection: React.FC = () => {
                 {/* status, clock and socials */}
                 <div
                   style={{ backfaceVisibility: 'hidden' }}
-                  className="w-full h-full p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[#fff9d4] border-2 border-[#0f172a] shadow-[3px_3px_0px_#0f172a] sm:shadow-[4px_4px_0px_#0f172a] flex flex-col justify-between space-y-3.5 sm:space-y-4"
+                  className={`w-full h-full p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 flex flex-col justify-between space-y-3.5 sm:space-y-4 transition-colors ${
+                    isSunset
+                      ? 'bg-[#2b1040] border-orange-500/40 shadow-[3px_3px_0px_#ea580c] sm:shadow-[4px_4px_0px_#ea580c]'
+                      : 'bg-[#fff9d4] border-[#0f172a] shadow-[3px_3px_0px_#0f172a] sm:shadow-[4px_4px_0px_#0f172a]'
+                  }`}
                 >
                   <div className="space-y-2.5 sm:space-y-3">
-                    <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-[#fffdf5] border-2 border-[#0f172a]">
-                      <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#475569]">
-                        <Clock className="w-4 h-4 text-[#0284c7]" />
+                    <div className={`flex items-center justify-between p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border-2 ${
+                      isSunset ? 'bg-[#1d092c] border-orange-500/30' : 'bg-[#fffdf5] border-[#0f172a]'
+                    }`}>
+                      <div className={`flex items-center gap-2 text-xs font-mono font-bold ${
+                        isSunset ? 'text-purple-200' : 'text-[#475569]'
+                      }`}>
+                        <Clock className={`w-4 h-4 ${isSunset ? 'text-amber-400' : 'text-[#0284c7]'}`} />
                         <span>Waktu Lokal (WIB)</span>
                       </div>
-                      <span className="text-sm font-mono font-black text-[#0f172a] tabular-nums">
+                      <span className={`text-sm font-mono font-black tabular-nums ${
+                        isSunset ? 'text-amber-300' : 'text-[#0f172a]'
+                      }`}>
                         {currentTime || '16:00:00'}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs font-mono text-[#475569] px-1">
+                    <div className={`flex items-center gap-2 text-xs font-mono px-1 ${
+                      isSunset ? 'text-purple-200' : 'text-[#475569]'
+                    }`}>
                       <MapPin className="w-4 h-4 text-[#ef4444] shrink-0" />
                       <span>Indonesia • Remote &amp; Hybrid Ready</span>
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-2 border-t-2 border-[#0f172a]/10">
+                  <div className={`space-y-2 pt-2 border-t-2 ${isSunset ? 'border-orange-500/20' : 'border-[#0f172a]/10'}`}>
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#64748b]">
+                      <span className={`text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider ${
+                        isSunset ? 'text-purple-300' : 'text-[#64748b]'
+                      }`}>
                         Socials &amp; Profil
                       </span>
                       <button
                         type="button"
                         onClick={() => setIsFlipped(true)}
-                        className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-mono font-bold text-[#0284c7] hover:text-[#0f172a] cursor-pointer"
+                        className={`inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-mono font-bold cursor-pointer ${
+                          isSunset ? 'text-amber-400 hover:text-white' : 'text-[#0284c7] hover:text-[#0f172a]'
+                        }`}
                       >
                         <span>Pesan Rahasia</span>
                         <RotateCw className="w-3 h-3" />
@@ -287,22 +344,30 @@ export const ContactSection: React.FC = () => {
                         href={profileData.contact.github}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-[#fffdf5] hover:bg-[#fde047] text-[#0f172a] font-mono font-bold text-[11px] sm:text-xs transition-all border-2 border-[#0f172a] shadow-[2px_2px_0px_#0f172a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0px_#0f172a] flex items-center justify-between group"
+                        className={`p-2 sm:p-2.5 rounded-xl sm:rounded-2xl font-mono font-bold text-[11px] sm:text-xs transition-all border-2 flex items-center justify-between group ${
+                          isSunset
+                            ? 'bg-[#3b1554] hover:bg-[#ff7b00] text-amber-200 hover:text-[#150720] border-orange-500/40 shadow-[2px_2px_0px_#ea580c] hover:shadow-[1px_1px_0px_#ea580c]'
+                            : 'bg-[#fffdf5] hover:bg-[#fde047] text-[#0f172a] border-[#0f172a] shadow-[2px_2px_0px_#0f172a] hover:shadow-[1px_1px_0px_#0f172a]'
+                        }`}
                       >
                         <div className="flex items-center gap-1.5">
-                          <svg className="w-3.5 h-3.5 text-[#0f172a]" fill="currentColor" viewBox="0 0 24 24">
+                          <svg className={`w-3.5 h-3.5 ${isSunset ? 'text-amber-200 group-hover:text-[#150720]' : 'text-[#0f172a]'}`} fill="currentColor" viewBox="0 0 24 24">
                             <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                           </svg>
                           <span>GitHub</span>
                         </div>
-                        <ExternalLink className="w-3 h-3 text-[#64748b] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        <ExternalLink className={`w-3 h-3 ${isSunset ? 'text-purple-300' : 'text-[#64748b]'} group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform`} />
                       </a>
 
                       <a
                         href={profileData.contact.linkedin}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-[#fffdf5] hover:bg-[#fde047] text-[#0f172a] font-mono font-bold text-[11px] sm:text-xs transition-all border-2 border-[#0f172a] shadow-[2px_2px_0px_#0f172a] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0px_#0f172a] flex items-center justify-between group"
+                        className={`p-2 sm:p-2.5 rounded-xl sm:rounded-2xl font-mono font-bold text-[11px] sm:text-xs transition-all border-2 flex items-center justify-between group ${
+                          isSunset
+                            ? 'bg-[#3b1554] hover:bg-[#ff7b00] text-amber-200 hover:text-[#150720] border-orange-500/40 shadow-[2px_2px_0px_#ea580c] hover:shadow-[1px_1px_0px_#ea580c]'
+                            : 'bg-[#fffdf5] hover:bg-[#fde047] text-[#0f172a] border-[#0f172a] shadow-[2px_2px_0px_#0f172a] hover:shadow-[1px_1px_0px_#0f172a]'
+                        }`}
                       >
                         <div className="flex items-center gap-1.5">
                           <svg className="w-3.5 h-3.5 text-[#0284c7]" fill="currentColor" viewBox="0 0 24 24">
@@ -310,7 +375,7 @@ export const ContactSection: React.FC = () => {
                           </svg>
                           <span>LinkedIn</span>
                         </div>
-                        <ExternalLink className="w-3 h-3 text-[#64748b] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        <ExternalLink className={`w-3 h-3 ${isSunset ? 'text-purple-300' : 'text-[#64748b]'} group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform`} />
                       </a>
                     </div>
                   </div>
@@ -322,16 +387,24 @@ export const ContactSection: React.FC = () => {
                     backfaceVisibility: 'hidden',
                     transform: 'rotateY(180deg)'
                   }}
-                  className="absolute inset-0 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-[#fde047] border-2 border-[#0f172a] shadow-[3px_3px_0px_#0f172a] sm:shadow-[4px_4px_0px_#0f172a] flex flex-col justify-between space-y-3"
+                  className={`absolute inset-0 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 flex flex-col justify-between space-y-3 ${
+                    isSunset
+                      ? 'bg-[#381652] border-orange-500/40 shadow-[3px_3px_0px_#ea580c] sm:shadow-[4px_4px_0px_#ea580c] text-purple-100'
+                      : 'bg-[#fde047] border-[#0f172a] shadow-[3px_3px_0px_#0f172a] sm:shadow-[4px_4px_0px_#0f172a] text-[#1e293b]'
+                  }`}
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-black text-[#0f172a] uppercase flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-[#0284c7]" />
+                      <span className={`text-xs font-mono font-black uppercase flex items-center gap-1.5 ${
+                        isSunset ? 'text-amber-300' : 'text-[#0f172a]'
+                      }`}>
+                        <Sparkles className="w-3.5 h-3.5 text-[#f59e0b]" />
                         <span>Pesan Rahasia Pengembang</span>
                       </span>
                     </div>
-                    <p className="text-xs font-medium text-[#1e293b] leading-relaxed">
+                    <p className={`text-xs font-medium leading-relaxed ${
+                      isSunset ? 'text-purple-200' : 'text-[#1e293b]'
+                    }`}>
                       Terima kasih sudah menjelajahi portofolio ini sampai tuntas! Selalu terbuka untuk ngobrol santai seputar web dev, mobile tech, atau kolaborasi proyek seru.
                     </p>
                   </div>
@@ -339,7 +412,11 @@ export const ContactSection: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsFlipped(false)}
-                    className="w-full py-2 px-3 rounded-xl bg-[#fffdf5] hover:bg-[#fff9d4] text-[#0f172a] text-xs font-mono font-black border-2 border-[#0f172a] shadow-[2px_2px_0px_#0f172a] transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    className={`w-full py-2 px-3 rounded-xl text-xs font-mono font-black border-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      isSunset
+                        ? 'bg-[#221033] hover:bg-[#ff7b00] text-amber-200 hover:text-[#150720] border-orange-500/40 shadow-[2px_2px_0px_#ea580c]'
+                        : 'bg-[#fffdf5] hover:bg-[#fff9d4] text-[#0f172a] border-[#0f172a] shadow-[2px_2px_0px_#0f172a]'
+                    }`}
                   >
                     <RotateCw className="w-3 h-3" />
                     <span>Kembali ke Profil</span>
@@ -356,30 +433,40 @@ export const ContactSection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.45, delay: 0.3 }}
-          className="p-4 sm:p-6 rounded-2xl sm:rounded-[28px] bg-[#fffdf5] border-2 sm:border-3 border-[#0f172a] shadow-[4px_4px_0px_#0f172a] sm:shadow-[6px_6px_0px_#0f172a] flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-[11px] sm:text-xs font-mono font-bold text-[#475569]"
+          className={`p-4 sm:p-6 rounded-2xl sm:rounded-[28px] border-2 sm:border-3 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-[11px] sm:text-xs font-mono font-bold transition-colors ${
+            isSunset
+              ? 'bg-[#200d33] border-orange-500/40 shadow-[4px_4px_0px_#ea580c] sm:shadow-[6px_6px_0px_#ea580c] text-purple-200'
+              : 'bg-[#fffdf5] border-[#0f172a] shadow-[4px_4px_0px_#0f172a] sm:shadow-[6px_6px_0px_#0f172a] text-[#475569]'
+          }`}
         >
-          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-[#0f172a] text-center sm:text-left">
-            <div className="flex items-center justify-center gap-1.5">
+          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
+            <div className={`flex items-center justify-center gap-1.5 ${isSunset ? 'text-white' : 'text-[#0f172a]'}`}>
               <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#f59e0b] shrink-0" />
               <span>
-                <a href="#/admin" title="Admin Portal" className="hover:text-[#0284c7] transition-colors cursor-default select-none">
+                <a href="#/admin" title="Admin Portal" className="hover:text-amber-400 transition-colors cursor-default select-none">
                   &copy;
                 </a>{' '}
                 {new Date().getFullYear()} {profileData.name}
               </span>
-              <span className="hidden sm:inline text-[#64748b]">•</span>
+              <span className={`hidden sm:inline ${isSunset ? 'text-purple-400' : 'text-[#64748b]'}`}>•</span>
             </div>
-            <span className="text-[10px] sm:text-xs text-[#64748b] sm:text-[#0f172a] font-normal sm:font-bold">
+            <span className={`text-[10px] sm:text-xs font-normal sm:font-bold ${
+              isSunset ? 'text-purple-300' : 'text-[#64748b] sm:text-[#0f172a]'
+            }`}>
               Full-Stack &amp; Mobile Developer
             </span>
           </div>
 
           <div className="flex items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto">
-            <span className="text-[#64748b] hidden md:inline">Built with React, Vite &amp; Tailwind CSS</span>
+            <span className={`hidden md:inline ${isSunset ? 'text-purple-300' : 'text-[#64748b]'}`}>Built with React, Vite &amp; Tailwind CSS</span>
             <button
               type="button"
               onClick={scrollToTop}
-              className="px-4 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl bg-[#fff9d4] hover:bg-[#fde047] text-[#0f172a] border-2 border-[#0f172a] shadow-[2px_2px_0px_#0f172a] transition-all cursor-pointer flex items-center justify-center gap-1.5 font-mono font-bold text-xs"
+              className={`px-4 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 font-mono font-bold text-xs ${
+                isSunset
+                  ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-[#150720] border-orange-400 shadow-[2px_2px_0px_#ea580c]'
+                  : 'bg-[#fff9d4] hover:bg-[#fde047] text-[#0f172a] border-[#0f172a] shadow-[2px_2px_0px_#0f172a]'
+              }`}
             >
               <span>Ke Atas</span>
               <ArrowUp className="w-3.5 h-3.5" />

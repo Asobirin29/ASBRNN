@@ -16,6 +16,31 @@ export function startLenisScroll(): void {
   }
 }
 
+export function scrollToLenis(
+  target: number | HTMLElement | string,
+  options?: { offset?: number; duration?: number }
+): void {
+  if (globalLenisInstance) {
+    globalLenisInstance.scrollTo(target, {
+      offset: options?.offset ?? 0,
+      duration: options?.duration ?? 1.1
+    });
+  } else {
+    if (typeof target === 'string') {
+      const el = document.querySelector(target);
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY + (options?.offset ?? 0);
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    } else if (typeof target === 'number') {
+      window.scrollTo({ top: target + (options?.offset ?? 0), behavior: 'smooth' });
+    } else if (target instanceof HTMLElement) {
+      const top = target.getBoundingClientRect().top + window.scrollY + (options?.offset ?? 0);
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  }
+}
+
 export function useLenisSmoothScroll(): void {
   useEffect(() => {
     const lenis = new Lenis({

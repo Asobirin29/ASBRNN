@@ -193,14 +193,20 @@ export function drawAnglerFish(
   ctx.stroke();
 
   // glowing lure bulb
+  const lureY = -32 + Math.sin(time * 3) * 4;
   const glow = 6 + Math.sin(time * 6) * 3;
-  ctx.fillStyle = '#fde047';
-  ctx.shadowColor = '#fde047';
-  ctx.shadowBlur = 16;
+
+  // outer atmospheric glow ring (no shadowBlur penalty)
+  ctx.fillStyle = 'rgba(253, 224, 71, 0.32)';
   ctx.beginPath();
-  ctx.arc(38, -32 + Math.sin(time * 3) * 4, glow, 0, Math.PI * 2);
+  ctx.arc(38, lureY, glow * 2.2, 0, Math.PI * 2);
   ctx.fill();
-  ctx.shadowBlur = 0;
+
+  // inner core bulb
+  ctx.fillStyle = '#fde047';
+  ctx.beginPath();
+  ctx.arc(38, lureY, glow, 0, Math.PI * 2);
+  ctx.fill();
 
   // sharp teeth
   ctx.fillStyle = '#ffffff';

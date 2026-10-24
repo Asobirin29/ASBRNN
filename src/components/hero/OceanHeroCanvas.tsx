@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 export interface OceanHeroHandle {
   triggerSplash: (x: number, y: number, intensity?: number) => void;
@@ -25,8 +26,22 @@ interface WaterRipple {
   speed: number;
 }
 
-export const OceanHeroCanvas = forwardRef<OceanHeroHandle, { className?: string }>(
-  ({ className = '' }, ref) => {
+export interface OceanHeroCanvasProps {
+  className?: string;
+  isSunset?: boolean;
+}
+
+export const OceanHeroCanvas = forwardRef<OceanHeroHandle, OceanHeroCanvasProps>(
+  ({ className = '', isSunset: propSunset }, ref) => {
+    const { isSunset: contextSunset } = useTheme();
+    const isSunset = propSunset !== undefined ? propSunset : contextSunset;
+    const isSunsetRef = useRef(isSunset);
+    isSunsetRef.current = isSunset;
+
+    useEffect(() => {
+      isSunsetRef.current = isSunset;
+    }, [isSunset]);
+
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const dropletsRef = useRef<SplashDroplet[]>([]);
     const ripplesRef = useRef<WaterRipple[]>([]);
@@ -109,6 +124,8 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, { className?: string 
 
       let isRunning = true;
 
+      let isVisible = true;
+
       const handleResize = () => {
         if (!canvas) return;
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -121,8 +138,28 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, { className?: string 
       handleResize();
       window.addEventListener('resize', handleResize);
 
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          const visible = entry.isIntersecting;
+          if (visible && !isVisible) {
+            isVisible = true;
+            if (!animRef.current) {
+              animRef.current = requestAnimationFrame(render);
+            }
+          } else if (!visible && isVisible) {
+            isVisible = false;
+            if (animRef.current) {
+              cancelAnimationFrame(animRef.current);
+              animRef.current = null;
+            }
+          }
+        },
+        { threshold: 0.05 }
+      );
+      observer.observe(canvas);
+
       const render = () => {
-        if (!isRunning || !canvas) return;
+        if (!isRunning || !canvas || !isVisible) return;
         const rect = canvas.getBoundingClientRect();
         const width = rect.width;
         const height = rect.height;
@@ -139,35 +176,101 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, { className?: string 
           return shoreBaseY + tidalCycle * tideAmplitude + Math.sin(x * 0.0045 + t * 0.5) * 8 + Math.cos(x * 0.009 - t * 0.3) * 4;
         };
 
-        const oceanGrad = ctx.createLinearGradient(0, 0, 0, shoreBaseY);
-        oceanGrad.addColorStop(0, '#02587a');
-        oceanGrad.addColorStop(0.35, '#0284c7');
-        oceanGrad.addColorStop(0.70, '#0ea5e9');
-        oceanGrad.addColorStop(1, '#38bdf8');
-        ctx.fillStyle = oceanGrad;
-        ctx.fillRect(0, 0, width, height);
+        const sunset = isSunsetRef.current;
 
-        ctx.save();
-        ctx.globalAlpha = 0.07;
-        ctx.fillStyle = '#fff9d4';
-        for (let i = 0; i < 4; i++) {
-          const patchX = (width * 0.25 * i + Math.sin(t * 0.15 + i) * 20) % width;
-          const patchY = height * 0.32 + (i % 2) * (height * 0.12);
+        if (sunset) {
+          // Rich Twilight Sky & Sunset Ocean Gradient
+          const oceanGrad = ctx.createLinearGradient(0, 0, 0, shoreBaseY);
+          oceanGrad.addColorStop(0, '#1c1033');    // deep violet dusk sky
+          oceanGrad.addColorStop(0.25, '#4a154b'); // rich magenta twilight
+          oceanGrad.addColorStop(0.55, '#881337'); // crimson red sunset glow
+          oceanGrad.addColorStop(0.78, '#ea580c'); // vibrant sunset orange
+          oceanGrad.addColorStop(1, '#f59e0b');    // warm golden water near shore
+          ctx.fillStyle = oceanGrad;
+          ctx.fillRect(0, 0, width, height);
+
+          // Glowing Sunset Sun Orb
+          const sunX = width * 0.5;
+          const sunY = shoreBaseY * 0.38;
+          const sunRadius = Math.min(width, height) * 0.088;
+
+          // Sunset Sun outer atmospheric glow
+          const sunGlow = ctx.createRadialGradient(sunX, sunY, sunRadius * 0.2, sunX, sunY, sunRadius * 4.2);
+          sunGlow.addColorStop(0, 'rgba(254, 215, 170, 0.55)');
+          sunGlow.addColorStop(0.3, 'rgba(251, 146, 60, 0.32)');
+          sunGlow.addColorStop(0.65, 'rgba(234, 88, 12, 0.12)');
+          sunGlow.addColorStop(1, 'rgba(234, 88, 12, 0)');
+          ctx.fillStyle = sunGlow;
+          ctx.fillRect(0, 0, width, height);
+
+          // Sun core
+          const sunCore = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius);
+          sunCore.addColorStop(0, '#ffffff');
+          sunCore.addColorStop(0.35, '#fef08a');
+          sunCore.addColorStop(0.75, '#f97316');
+          sunCore.addColorStop(1, 'rgba(234, 88, 12, 0.95)');
           ctx.beginPath();
-          ctx.ellipse(patchX, patchY, 120, 45, Math.PI / 8, 0, Math.PI * 2);
+          ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
+          ctx.fillStyle = sunCore;
           ctx.fill();
+
+          // Golden Sunbeam Shimmer / Specular reflection path across water surface
+          ctx.save();
+          for (let y = sunY + sunRadius * 0.65; y < shoreBaseY; y += 8) {
+            const progress = (y - (sunY + sunRadius * 0.65)) / (shoreBaseY - (sunY + sunRadius * 0.65));
+            const beamWidth = sunRadius * (1.1 + progress * 4.0);
+            const waveShift = Math.sin(y * 0.045 + t * 2.2) * (12 * progress);
+            const barWidth = beamWidth * (0.6 + Math.sin(y * 0.12 + t * 3.2) * 0.4);
+            ctx.beginPath();
+            ctx.ellipse(sunX + waveShift, y, barWidth, 1.8, 0, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(254, 240, 138, ${0.46 * (1 - progress * 0.35)})`;
+            ctx.fill();
+          }
+          ctx.restore();
+
+          // Sunset warm embers floating gently in evening breeze
+          ctx.save();
+          for (let i = 0; i < 12; i++) {
+            const emberX = (width * 0.08 * i + Math.sin(t * 0.3 + i * 2) * 40 + width) % width;
+            const emberY = (height * 0.55 + Math.cos(t * 0.2 + i * 1.5) * 60 + height) % height;
+            ctx.beginPath();
+            ctx.arc(emberX, emberY, 1.2 + Math.sin(t * 2 + i) * 0.6, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(254, 215, 170, ${0.4 + Math.sin(t * 3 + i) * 0.3})`;
+            ctx.fill();
+          }
+          ctx.restore();
+        } else {
+          // Daylight Bright Ocean
+          const oceanGrad = ctx.createLinearGradient(0, 0, 0, shoreBaseY);
+          oceanGrad.addColorStop(0, '#02587a');
+          oceanGrad.addColorStop(0.35, '#0284c7');
+          oceanGrad.addColorStop(0.70, '#0ea5e9');
+          oceanGrad.addColorStop(1, '#38bdf8');
+          ctx.fillStyle = oceanGrad;
+          ctx.fillRect(0, 0, width, height);
+
+          ctx.save();
+          ctx.globalAlpha = 0.07;
+          ctx.fillStyle = '#fff9d4';
+          for (let i = 0; i < 4; i++) {
+            const patchX = (width * 0.25 * i + Math.sin(t * 0.15 + i) * 20) % width;
+            const patchY = height * 0.32 + (i % 2) * (height * 0.12);
+            ctx.beginPath();
+            ctx.ellipse(patchX, patchY, 120, 45, Math.PI / 8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
         }
-        ctx.restore();
 
         const wave1Y = height * 0.26;
         ctx.save();
         ctx.beginPath();
-        for (let x = 0; x <= width; x += 4) {
+        for (let x = 0; x <= width; x += 6) {
           const cy = wave1Y + Math.sin(x * 0.005 + t * 0.45) * 12 + Math.cos(x * 0.009 - t * 0.3) * 5;
           if (x === 0) ctx.moveTo(x, cy);
           else ctx.lineTo(x, cy);
         }
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.strokeStyle = sunset ? 'rgba(254, 215, 170, 0.6)' : 'rgba(255, 255, 255, 0.45)';
         ctx.lineWidth = 1.8;
         ctx.stroke();
         ctx.restore();
@@ -175,12 +278,12 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, { className?: string 
         const wave2Y = height * 0.45;
         ctx.save();
         ctx.beginPath();
-        for (let x = 0; x <= width; x += 4) {
+        for (let x = 0; x <= width; x += 6) {
           const cy = wave2Y + Math.sin(x * 0.006 + t * 0.55 + 1.5) * 14 + Math.sin(x * 0.012 - t * 0.25) * 6;
           if (x === 0) ctx.moveTo(x, cy);
           else ctx.lineTo(x, cy);
         }
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+        ctx.strokeStyle = sunset ? 'rgba(253, 186, 116, 0.8)' : 'rgba(255, 255, 255, 0.65)';
         ctx.lineWidth = 2.2;
         ctx.stroke();
         ctx.restore();
@@ -189,44 +292,44 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, { className?: string 
         ctx.beginPath();
         ctx.moveTo(0, height);
         ctx.lineTo(0, getTideY(0));
-        for (let x = 0; x <= width; x += 3) {
+        for (let x = 0; x <= width; x += 6) {
           ctx.lineTo(x, getTideY(x));
         }
         ctx.lineTo(width, height);
         ctx.closePath();
-        ctx.fillStyle = '#fff9d4';
+        ctx.fillStyle = sunset ? '#190f26' : '#fff9d4';
         ctx.fill();
         ctx.restore();
 
         ctx.save();
         ctx.beginPath();
-        for (let x = 0; x <= width; x += 3) {
+        for (let x = 0; x <= width; x += 6) {
           const cy = getTideY(x);
           if (x === 0) ctx.moveTo(x, cy + 2);
           else ctx.lineTo(x, cy + 2);
         }
-        ctx.strokeStyle = '#e5dbae';
+        ctx.strokeStyle = sunset ? '#4a154b' : '#e5dbae';
         ctx.lineWidth = 4.0;
         ctx.stroke();
 
         ctx.beginPath();
-        for (let x = 0; x <= width; x += 3) {
+        for (let x = 0; x <= width; x += 6) {
           const cy = getTideY(x);
           if (x === 0) ctx.moveTo(x, cy);
           else ctx.lineTo(x, cy);
         }
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.98)';
+        ctx.strokeStyle = sunset ? 'rgba(254, 240, 138, 0.96)' : 'rgba(255, 255, 255, 0.98)';
         ctx.lineWidth = 3.8;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.stroke();
 
-        for (let x = 6; x < width; x += 16) {
+        for (let x = 6; x < width; x += 20) {
           const cy = getTideY(x);
           const bubbleSpread = (Math.sin(x * 0.06 + t * 0.8) + 1) * 3 + 1;
           ctx.beginPath();
           ctx.arc(x + Math.sin(t * 0.8 + x) * 2, cy + bubbleSpread, 1.6 + Math.sin(x * 0.3) * 0.8, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+          ctx.fillStyle = sunset ? 'rgba(254, 240, 138, 0.92)' : 'rgba(255, 255, 255, 0.92)';
           ctx.fill();
         }
         ctx.restore();
@@ -244,13 +347,17 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, { className?: string 
           ctx.save();
           ctx.beginPath();
           ctx.ellipse(r.x, r.y, r.radius, r.radius * 0.42, 0, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(255, 255, 255, ${r.alpha * 0.95})`;
+          ctx.strokeStyle = sunset
+            ? `rgba(251, 146, 60, ${r.alpha * 0.95})`
+            : `rgba(255, 255, 255, ${r.alpha * 0.95})`;
           ctx.lineWidth = 2.4;
           ctx.stroke();
 
           ctx.beginPath();
           ctx.ellipse(r.x, r.y, r.radius * 0.68, r.radius * 0.28, 0, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(103, 232, 249, ${r.alpha * 0.75})`;
+          ctx.strokeStyle = sunset
+            ? `rgba(253, 230, 138, ${r.alpha * 0.8})`
+            : `rgba(103, 232, 249, ${r.alpha * 0.75})`;
           ctx.lineWidth = 1.8;
           ctx.stroke();
           ctx.restore();
@@ -272,8 +379,6 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, { className?: string 
           ctx.beginPath();
           ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(255, 255, 255, ${d.alpha})`;
-          ctx.shadowColor = '#67e8f9';
-          ctx.shadowBlur = 6;
           ctx.fill();
           ctx.restore();
         }
@@ -287,6 +392,7 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, { className?: string 
         isRunning = false;
         if (animRef.current) cancelAnimationFrame(animRef.current);
         window.removeEventListener('resize', handleResize);
+        observer.disconnect();
       };
     }, []);
 

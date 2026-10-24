@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { motion, useMotionValue } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 
 export interface BeachCrabHandle {
   triggerStun: (knockbackDirection: 'left' | 'right') => void;
@@ -7,18 +8,28 @@ export interface BeachCrabHandle {
   isStunned: () => boolean;
 }
 
-const CRAB_DIALOGUES = [
+const CRAB_DAY_DIALOGUES = [
   '*Klak klik capit*',
-  'Spike capitku tak tertandingi di lapangan voli pantai!',
-  'Bebek jangan ganggu, aku lagi pemanasan servis voli pasir!',
-  'Burung camar di atas tolong jadi wasit voli yang adil ya!',
+  'Spike capitku tak tertandingi di lapangan voli pantai Bikini Bottom!',
+  'SpongeBob jangan ganggu, aku lagi pemanasan servis voli pasir!',
+  'Hiu di air tolong awasi bola kalau nyebur ke laut ya!',
   'Smash capit! Lapangan voli pantai hari ini dikuasai tim kepiting!',
-  'Bebek, kalau bola volinya nyebur ke air tolong oper balik ke sini!',
+  'SpongeBob, habis main voli bikinin aku Krabby Patty ya!',
   'Jalan miring adalah gaya terbaik buat main voli pantai!',
-  'Lapangan voli sudah siap buat turnamen pantai hari ini!',
+  'Pulau di sana pemandangannya keren banget!',
   'Awas kena capit tangguhku!',
   'Pasir pantainya hangat dan empuk banget hari ini ~',
   'Kodingan di portofolio ini rapi, bersih, dan kokoh banget!'
+];
+
+const CRAB_SUNSET_DIALOGUES = [
+  '*Klak klik capit di pasir senja*',
+  'Sunset sore gini enaknya santai di pinggir pantai Bikini Bottom ~',
+  'Pantai senja warna jingga, kodingan makin estetik!',
+  'SpongeBob & Hiu, sunset-nya bagus banget kan dari kejauhan?',
+  'Turnamen voli pantai selesai, saatnya santai nikmati senja!',
+  'Langit senja merah merona, vibes-nya tenang banget!',
+  'Pasir pantai mulai adem menjelang petang ~'
 ];
 
 const createShuffledDeck = (items: string[], lastItem?: string): string[] => {
@@ -34,6 +45,7 @@ const createShuffledDeck = (items: string[], lastItem?: string): string[] => {
 };
 
 export const BeachCrab = forwardRef<BeachCrabHandle>((_props, ref) => {
+  const { isSunset } = useTheme();
   const screenInitialWidth = typeof window !== 'undefined' ? window.innerWidth + 80 : 1500;
   const x = useMotionValue(screenInitialWidth);
   const [currentQuip, setCurrentQuip] = useState<string | null>(null);
@@ -42,7 +54,8 @@ export const BeachCrab = forwardRef<BeachCrabHandle>((_props, ref) => {
   const crabRef = useRef<HTMLDivElement | null>(null);
   const isStunnedRef = useRef<boolean>(false);
 
-  const deckRef = useRef<string[]>(createShuffledDeck(CRAB_DIALOGUES));
+  const activeDialogues = isSunset ? CRAB_SUNSET_DIALOGUES : CRAB_DAY_DIALOGUES;
+  const deckRef = useRef<string[]>(createShuffledDeck(activeDialogues));
   const lastQuipRef = useRef<string>('');
 
   useImperativeHandle(ref, () => ({
@@ -69,7 +82,24 @@ export const BeachCrab = forwardRef<BeachCrabHandle>((_props, ref) => {
     isStunned: () => isStunnedRef.current
   }));
 
+  const [isInView, setIsInView] = useState<boolean>(true);
+
   useEffect(() => {
+    const el = crabRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.02 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isInView) return;
+
     let animId: number;
     let lastTime = performance.now();
 
@@ -95,7 +125,11 @@ export const BeachCrab = forwardRef<BeachCrabHandle>((_props, ref) => {
 
     animId = requestAnimationFrame(scuttleLoop);
     return () => cancelAnimationFrame(animId);
-  }, [x]);
+  }, [isInView, x]);
+
+  useEffect(() => {
+    deckRef.current = createShuffledDeck(activeDialogues, lastQuipRef.current);
+  }, [isSunset, activeDialogues]);
 
   useEffect(() => {
     const quipInterval = setInterval(() => {
@@ -103,10 +137,10 @@ export const BeachCrab = forwardRef<BeachCrabHandle>((_props, ref) => {
         const rect = crabRef.current.getBoundingClientRect();
         if (rect.right > 100 && rect.left < window.innerWidth - 100) {
           if (deckRef.current.length === 0) {
-            deckRef.current = createShuffledDeck(CRAB_DIALOGUES, lastQuipRef.current);
+            deckRef.current = createShuffledDeck(activeDialogues, lastQuipRef.current);
           }
 
-          const nextQuip = deckRef.current.pop() || CRAB_DIALOGUES[0];
+          const nextQuip = deckRef.current.pop() || activeDialogues[0];
           lastQuipRef.current = nextQuip;
           setCurrentQuip(nextQuip);
 
@@ -118,7 +152,7 @@ export const BeachCrab = forwardRef<BeachCrabHandle>((_props, ref) => {
     }, 8800);
 
     return () => clearInterval(quipInterval);
-  }, []);
+  }, [activeDialogues]);
 
   return (
     <motion.div
@@ -262,7 +296,11 @@ export const BeachCrab = forwardRef<BeachCrabHandle>((_props, ref) => {
             initial={{ opacity: 0, scale: 0.75, y: 6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.75, y: 6 }}
-            className="absolute -top-9 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-white/95 text-[#c2410c] text-[11px] font-bold shadow-lg border border-[#f97316] whitespace-nowrap backdrop-blur-xs flex items-center gap-1"
+            className={`absolute -top-9 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[11px] font-bold shadow-lg whitespace-nowrap backdrop-blur-xs flex items-center gap-1 transition-all ${
+              isSunset
+                ? 'bg-[#25122e]/95 text-amber-300 border border-orange-400 shadow-[0_4px_16px_rgba(234,88,12,0.35)]'
+                : 'bg-white/95 text-[#c2410c] border border-[#f97316] shadow-lg'
+            }`}
           >
             <span>{currentQuip}</span>
           </motion.div>

@@ -1,9 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 
 export const BeachDecorations: React.FC = () => {
+  const { isSunset } = useTheme();
+
   return (
-    <div className="absolute inset-x-0 bottom-0 h-64 z-20 pointer-events-none overflow-hidden select-none">
+    <div
+      className={`absolute inset-x-0 bottom-0 h-64 z-20 pointer-events-none overflow-hidden select-none transition-all duration-700 ${
+        isSunset ? 'brightness-90 sepia-[0.35] hue-rotate-[-12deg]' : ''
+      }`}
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}

@@ -1,11 +1,14 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ProfileDuneBackgroundProps {
   isFlooded: boolean;
 }
 
 export const ProfileDuneBackground: React.FC<ProfileDuneBackgroundProps> = ({ isFlooded }) => {
+  const { isSunset } = useTheme();
+
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
@@ -18,16 +21,16 @@ export const ProfileDuneBackground: React.FC<ProfileDuneBackgroundProps> = ({ is
         >
           <path
             d="M-100,80 Q420,220 880,100 T1540,180 L1540,900 L-100,900 Z"
-            fill="#fcf3d1"
+            fill={isSunset ? '#2e1442' : '#fcf3d1'}
           />
           <path
             d="M-100,280 Q520,420 1020,260 T1540,380 L1540,900 L-100,900 Z"
-            fill={isFlooded ? '#e8d8a7' : '#f6e8ba'}
+            fill={isSunset ? '#230d35' : isFlooded ? '#e8d8a7' : '#f6e8ba'}
             opacity="0.85"
           />
           <path
             d="M-100,520 Q360,660 920,480 T1540,620 L1540,900 L-100,900 Z"
-            fill={isFlooded ? '#dfcca8' : '#f0dc9f'}
+            fill={isSunset ? '#1a0828' : isFlooded ? '#dfcca8' : '#f0dc9f'}
             opacity="0.7"
           />
         </svg>
@@ -38,23 +41,23 @@ export const ProfileDuneBackground: React.FC<ProfileDuneBackgroundProps> = ({ is
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
-        className="absolute inset-0 w-full h-full opacity-40"
+        className="absolute inset-0 w-full h-full opacity-45"
       >
         <path
           d="M0,140 Q460,250 940,160 T1440,240"
-          stroke="#dfcca8"
+          stroke={isSunset ? 'rgba(251, 146, 60, 0.45)' : '#dfcca8'}
           strokeWidth="1.5"
           strokeDasharray="6 8"
         />
         <path
           d="M0,340 Q560,460 1040,320 T1440,420"
-          stroke="#c4ad82"
+          stroke={isSunset ? 'rgba(234, 88, 12, 0.35)' : '#c4ad82'}
           strokeWidth="1.5"
           strokeDasharray="8 10"
         />
         <path
           d="M0,580 Q400,680 960,540 T1440,640"
-          stroke="#b39768"
+          stroke={isSunset ? 'rgba(192, 132, 252, 0.35)' : '#b39768'}
           strokeWidth="1.5"
         />
       </svg>
@@ -74,10 +77,10 @@ export const ProfileDuneBackground: React.FC<ProfileDuneBackgroundProps> = ({ is
             </g>
 
             {/* Wet Water Pools */}
-            <ellipse cx="380" cy="540" rx="160" ry="40" fill="#38bdf8" opacity="0.35" />
-            <ellipse cx="960" cy="610" rx="210" ry="45" fill="#0284c7" opacity="0.3" />
-            <ellipse cx="200" cy="730" rx="125" ry="30" fill="#38bdf8" opacity="0.4" />
-            <ellipse cx="720" cy="780" rx="140" ry="32" fill="#0284c7" opacity="0.25" />
+            <ellipse cx="380" cy="540" rx="160" ry="40" fill={isSunset ? '#ea580c' : '#38bdf8'} opacity={isSunset ? 0.45 : 0.35} />
+            <ellipse cx="960" cy="610" rx="210" ry="45" fill={isSunset ? '#f97316' : '#0284c7'} opacity={isSunset ? 0.35 : 0.3} />
+            <ellipse cx="200" cy="730" rx="125" ry="30" fill={isSunset ? '#ea580c' : '#38bdf8'} opacity={isSunset ? 0.5 : 0.4} />
+            <ellipse cx="720" cy="780" rx="140" ry="32" fill={isSunset ? '#c2410c' : '#0284c7'} opacity={isSunset ? 0.35 : 0.25} />
           </svg>
         </motion.div>
       )}
@@ -94,26 +97,26 @@ export const ProfileDuneBackground: React.FC<ProfileDuneBackgroundProps> = ({ is
               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
             >
               <svg width="110" height="95" viewBox="0 0 110 95" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-md">
-                <ellipse cx="55" cy="85" rx="50" ry="9" fill="#ebdcae" />
-                <path d="M15 78 L95 78 L90 86 L20 86 Z" fill="#c4ad82" />
-                <rect x="22" y="44" width="66" height="36" rx="2" fill="#dfcca8" stroke="#8c6239" strokeWidth="2" />
-                <path d="M22 44 L28 44 L28 49 L34 49 L34 44 L40 44 L40 49 L46 49 L46 44 L52 44 L52 49 L58 49 L58 44 L64 44 L64 49 L70 49 L70 44 L76 44 L76 49 L82 49 L82 44 L88 44" stroke="#8c6239" strokeWidth="2" fill="none" />
-                <rect x="16" y="30" width="22" height="46" rx="2" fill="#ebdcae" stroke="#8c6239" strokeWidth="2" />
-                <path d="M16 30 L21 30 L21 34 L27 34 L27 30 L32 30 L32 34 L38 34 L38 30" stroke="#8c6239" strokeWidth="1.8" fill="none" />
-                <polygon points="27,10 16,30 38,30" fill="#f5ebb8" stroke="#8c6239" strokeWidth="1.8" />
-                <line x1="27" y1="2" x2="27" y2="10" stroke="#8c6239" strokeWidth="1.8" />
+                <ellipse cx="55" cy="85" rx="50" ry="9" fill={isSunset ? '#3c1b48' : '#ebdcae'} />
+                <path d="M15 78 L95 78 L90 86 L20 86 Z" fill={isSunset ? '#2a1133' : '#c4ad82'} />
+                <rect x="22" y="44" width="66" height="36" rx="2" fill={isSunset ? '#341540' : '#dfcca8'} stroke={isSunset ? '#f97316' : '#8c6239'} strokeWidth="2" />
+                <path d="M22 44 L28 44 L28 49 L34 49 L34 44 L40 44 L40 49 L46 49 L46 44 L52 44 L52 49 L58 49 L58 44 L64 44 L64 49 L70 49 L70 44 L76 44 L76 49 L82 49 L82 44 L88 44" stroke={isSunset ? '#f97316' : '#8c6239'} strokeWidth="2" fill="none" />
+                <rect x="16" y="30" width="22" height="46" rx="2" fill={isSunset ? '#3c1b48' : '#ebdcae'} stroke={isSunset ? '#f97316' : '#8c6239'} strokeWidth="2" />
+                <path d="M16 30 L21 30 L21 34 L27 34 L27 30 L32 30 L32 34 L38 34 L38 30" stroke={isSunset ? '#f97316' : '#8c6239'} strokeWidth="1.8" fill="none" />
+                <polygon points="27,10 16,30 38,30" fill={isSunset ? '#f59e0b' : '#f5ebb8'} stroke={isSunset ? '#ea580c' : '#8c6239'} strokeWidth="1.8" />
+                <line x1="27" y1="2" x2="27" y2="10" stroke={isSunset ? '#f59e0b' : '#8c6239'} strokeWidth="1.8" />
                 <polygon points="27,2 35,5 27,8" fill="#F97316" stroke="#EA580C" strokeWidth="1" />
-                <rect x="72" y="30" width="22" height="46" rx="2" fill="#ebdcae" stroke="#8c6239" strokeWidth="2" />
-                <path d="M72 30 L77 30 L77 34 L83 34 L83 30 L88 30 L88 34 L94 34 L94 30" stroke="#8c6239" strokeWidth="1.8" fill="none" />
-                <polygon points="83,10 72,30 94,30" fill="#f5ebb8" stroke="#8c6239" strokeWidth="1.8" />
-                <line x1="83" y1="2" x2="83" y2="10" stroke="#8c6239" strokeWidth="1.8" />
+                <rect x="72" y="30" width="22" height="46" rx="2" fill={isSunset ? '#3c1b48' : '#ebdcae'} stroke={isSunset ? '#f97316' : '#8c6239'} strokeWidth="2" />
+                <path d="M72 30 L77 30 L77 34 L83 34 L83 30 L88 30 L88 34 L94 34 L94 30" stroke={isSunset ? '#f97316' : '#8c6239'} strokeWidth="1.8" fill="none" />
+                <polygon points="83,10 72,30 94,30" fill={isSunset ? '#f59e0b' : '#f5ebb8'} stroke={isSunset ? '#ea580c' : '#8c6239'} strokeWidth="1.8" />
+                <line x1="83" y1="2" x2="83" y2="10" stroke={isSunset ? '#f59e0b' : '#8c6239'} strokeWidth="1.8" />
                 <polygon points="83,2 91,5 83,8" fill="#F97316" stroke="#EA580C" strokeWidth="1" />
-                <rect x="42" y="24" width="26" height="34" rx="2" fill="#fcf3d1" stroke="#8c6239" strokeWidth="2" />
-                <polygon points="55,4 40,24 70,24" fill="#0284c7" stroke="#0369a1" strokeWidth="2" />
-                <line x1="55" y1="-3" x2="55" y2="4" stroke="#8c6239" strokeWidth="2" />
-                <polygon points="55,-3 65,1 55,5" fill="#38bdf8" stroke="#0284c7" strokeWidth="1.2" />
-                <path d="M47 80 C47 67, 63 67, 63 80 Z" fill="#8c6239" />
-                <circle cx="55" cy="50" r="3" fill="#8c6239" />
+                <rect x="42" y="24" width="26" height="34" rx="2" fill={isSunset ? '#451a52' : '#fcf3d1'} stroke={isSunset ? '#f97316' : '#8c6239'} strokeWidth="2" />
+                <polygon points="55,4 40,24 70,24" fill={isSunset ? '#ea580c' : '#0284c7'} stroke={isSunset ? '#c2410c' : '#0369a1'} strokeWidth="2" />
+                <line x1="55" y1="-3" x2="55" y2="4" stroke={isSunset ? '#f97316' : '#8c6239'} strokeWidth="2" />
+                <polygon points="55,-3 65,1 55,5" fill={isSunset ? '#fde047' : '#38bdf8'} stroke={isSunset ? '#f59e0b' : '#0284c7'} strokeWidth="1.2" />
+                <path d="M47 80 C47 67, 63 67, 63 80 Z" fill={isSunset ? '#1a0828' : '#8c6239'} />
+                <circle cx="55" cy="50" r="3" fill={isSunset ? '#f97316' : '#8c6239'} />
               </svg>
             </motion.div>
           ) : (
@@ -125,10 +128,10 @@ export const ProfileDuneBackground: React.FC<ProfileDuneBackgroundProps> = ({ is
               transition={{ type: 'spring', stiffness: 240, damping: 20 }}
             >
               <svg width="110" height="95" viewBox="0 0 110 95" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-md">
-                <ellipse cx="55" cy="82" rx="52" ry="12" fill="#c4ad82" />
-                <path d="M12 84 Q55 46 98 84 Z" fill="#dfcca8" stroke="#8c6239" strokeWidth="2" />
-                <path d="M30 84 Q55 58 80 84 Z" fill="#ebdcae" />
-                <line x1="48" y1="56" x2="68" y2="76" stroke="#8c6239" strokeWidth="2.5" strokeLinecap="round" />
+                <ellipse cx="55" cy="82" rx="52" ry="12" fill={isSunset ? '#2a1133' : '#c4ad82'} />
+                <path d="M12 84 Q55 46 98 84 Z" fill={isSunset ? '#341540' : '#dfcca8'} stroke={isSunset ? '#f97316' : '#8c6239'} strokeWidth="2" />
+                <path d="M30 84 Q55 58 80 84 Z" fill={isSunset ? '#3c1b48' : '#ebdcae'} />
+                <line x1="48" y1="56" x2="68" y2="76" stroke={isSunset ? '#f97316' : '#8c6239'} strokeWidth="2.5" strokeLinecap="round" />
                 <polygon points="68,76 80,72 74,84" fill="#F97316" stroke="#EA580C" strokeWidth="1.2" />
               </svg>
             </motion.div>

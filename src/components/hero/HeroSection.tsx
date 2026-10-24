@@ -1,24 +1,25 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { ArrowDown, Download, ExternalLink } from 'lucide-react';
 import { OceanHeroCanvas } from './OceanHeroCanvas';
 import type { OceanHeroHandle } from './OceanHeroCanvas';
 import { HeroPhysicsStage } from './HeroPhysicsStage';
 import type { HeroPhysicsStageHandle } from './HeroPhysicsStage';
-import { SwimmingDuck } from './SwimmingDuck';
-import type { DuckExpression } from './SwimmingDuck';
-import { FlyingSeagull } from './FlyingSeagull';
+import { BikiniIsland } from './BikiniIsland';
+import { SwimmingShark } from './SwimmingShark';
+import { SpongeBobHero } from './SpongeBobHero';
 import { BeachCrab } from './BeachCrab';
 import type { BeachCrabHandle } from './BeachCrab';
 import { BeachDecorations } from './BeachDecorations';
 import { TactileButton } from '../ui/TactileButton';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export const HeroSection: React.FC = () => {
   const { profile: profileData } = usePortfolioData();
+  const { isSunset } = useTheme();
   const oceanRef = useRef<OceanHeroHandle | null>(null);
   const stageRef = useRef<HeroPhysicsStageHandle | null>(null);
   const crabRef = useRef<BeachCrabHandle | null>(null);
-  const [duckExpression, setDuckExpression] = useState<DuckExpression>('normal');
 
   const collisionCooldownRef = useRef<boolean>(false);
 
@@ -34,37 +35,32 @@ export const HeroSection: React.FC = () => {
     }
   };
 
-  const checkDuckCrabCollision = (duckRect: DOMRect) => {
+  const checkCollisionWithCrab = (entityRect: DOMRect) => {
     if (collisionCooldownRef.current || !crabRef.current) return;
     const crabRect = crabRef.current.getCrabRect();
     if (!crabRect) return;
 
-    const duckCenterX = duckRect.left + duckRect.width / 2;
-    const duckCenterY = duckRect.top + duckRect.height / 2;
+    const entityCenterX = entityRect.left + entityRect.width / 2;
+    const entityCenterY = entityRect.top + entityRect.height / 2;
     const crabCenterX = crabRect.left + crabRect.width / 2;
     const crabCenterY = crabRect.top + crabRect.height / 2;
 
-    const dx = Math.abs(duckCenterX - crabCenterX);
-    const dy = Math.abs(duckCenterY - crabCenterY);
+    const dx = Math.abs(entityCenterX - crabCenterX);
+    const dy = Math.abs(entityCenterY - crabCenterY);
 
-    if (dx < 60 && dy < 48) {
+    if (dx < 70 && dy < 55) {
       collisionCooldownRef.current = true;
-      crabRef.current.triggerStun(duckCenterX < crabCenterX ? 'right' : 'left');
-      setDuckExpression('impact');
-
-      setTimeout(() => {
-        setDuckExpression('normal');
-      }, 2000);
+      crabRef.current.triggerStun(entityCenterX < crabCenterX ? 'right' : 'left');
 
       setTimeout(() => {
         collisionCooldownRef.current = false;
-      }, 3200);
+      }, 3000);
     }
   };
 
-  const handleDuckDrop = (clientX: number, clientY: number, velocity: number, duckRect?: DOMRect) => {
-    if (duckRect) {
-      checkDuckCrabCollision(duckRect);
+  const handleSharkDrop = (clientX: number, clientY: number, velocity: number, sharkRect?: DOMRect) => {
+    if (sharkRect) {
+      checkCollisionWithCrab(sharkRect);
     }
 
     if (stageRef.current) {
@@ -74,11 +70,11 @@ export const HeroSection: React.FC = () => {
     }
   };
 
-  const handleDuckSwim = (duckX: number, duckY: number) => {
+  const handleSharkSwim = (sharkX: number, sharkY: number) => {
     if (stageRef.current) {
-      stageRef.current.handleDuckSwim(duckX, duckY);
+      stageRef.current.handleDuckSwim(sharkX, sharkY);
     } else {
-      handleRipple(duckX, duckY, 45);
+      handleRipple(sharkX, sharkY, 45);
     }
   };
 
@@ -92,19 +88,28 @@ export const HeroSection: React.FC = () => {
   return (
     <section className="relative w-full h-screen min-h-[700px] flex flex-col justify-between pt-16 pb-10 overflow-hidden select-none">
       <div className="absolute inset-0 z-0 pointer-events-auto">
-        <OceanHeroCanvas ref={oceanRef} />
+        <OceanHeroCanvas key={isSunset ? 'sunset' : 'day'} isSunset={isSunset} ref={oceanRef} />
       </div>
 
-      <FlyingSeagull />
+      {/* Bikini Atoll Island in Horizon & Sky Flowers */}
+      <BikiniIsland onIslandClick={(x, y) => handleRipple(x, y, 50)} />
 
-      <SwimmingDuck
-        expression={duckExpression}
-        onDuckDrop={handleDuckDrop}
-        onDuckSwim={handleDuckSwim}
-        onDuckSplash={(x, y) => handleSplash(x, y, 1.3)}
-        onDuckWaddle={checkDuckCrabCollision}
+      {/* Swimming Shark Patrol */}
+      <SwimmingShark
+        onSharkDrop={handleSharkDrop}
+        onSharkSwim={handleSharkSwim}
+        onSharkSplash={(x, y) => handleSplash(x, y, 1.4)}
+        onSharkWaddle={checkCollisionWithCrab}
       />
 
+      {/* SpongeBob SquarePants on the Beach / Water */}
+      <SpongeBobHero
+        onSplash={handleSplash}
+        onRipple={handleRipple}
+        onCrabCollision={checkCollisionWithCrab}
+      />
+
+      {/* Volleyball Playing Crab */}
       <BeachCrab ref={crabRef} />
 
       <BeachDecorations />
@@ -115,7 +120,6 @@ export const HeroSection: React.FC = () => {
             ref={stageRef}
             onSplash={handleSplash}
             onRipple={handleRipple}
-            onDuckExpressionChange={setDuckExpression}
           />
 
           <p className="mt-3 sm:mt-4 max-w-xl text-center text-xs sm:text-base text-[#f8fafc] font-medium leading-relaxed drop-shadow-md px-2">
@@ -136,9 +140,13 @@ export const HeroSection: React.FC = () => {
               download="cv.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#0d2844] hover:bg-[#123559] text-[#f8fafc] border border-[#224c75] hover:border-[#dfcca8]/60 font-medium text-xs sm:text-sm transition-all select-none cursor-pointer hover:-translate-y-0.5"
+              className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm transition-all select-none cursor-pointer hover:-translate-y-0.5 ${
+                isSunset
+                  ? 'bg-[#2a133d] hover:bg-[#3d1858] text-[#f8fafc] border border-[#f97316]/50 hover:border-amber-300 shadow-[0_4px_16px_rgba(234,88,12,0.25)]'
+                  : 'bg-[#0d2844] hover:bg-[#123559] text-[#f8fafc] border border-[#224c75] hover:border-[#dfcca8]/60 shadow-md'
+              }`}
             >
-              <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#38bdf8]" />
+              <Download className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isSunset ? 'text-amber-400' : 'text-[#38bdf8]'}`} />
               <span>Download CV</span>
             </a>
 
@@ -146,10 +154,14 @@ export const HeroSection: React.FC = () => {
               href={profileData.contact.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#0d2844] hover:bg-[#123559] text-[#f8fafc] border border-[#224c75] hover:border-[#dfcca8]/60 font-medium text-xs sm:text-sm transition-all select-none cursor-pointer hover:-translate-y-0.5"
+              className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm transition-all select-none cursor-pointer hover:-translate-y-0.5 ${
+                isSunset
+                  ? 'bg-[#2a133d] hover:bg-[#3d1858] text-[#f8fafc] border border-[#f97316]/50 hover:border-amber-300 shadow-[0_4px_16px_rgba(234,88,12,0.25)]'
+                  : 'bg-[#0d2844] hover:bg-[#123559] text-[#f8fafc] border border-[#224c75] hover:border-[#dfcca8]/60 shadow-md'
+              }`}
             >
               <span>GitHub</span>
-              <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#dfcca8]" />
+              <ExternalLink className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${isSunset ? 'text-orange-300' : 'text-[#dfcca8]'}`} />
             </a>
           </div>
         </div>

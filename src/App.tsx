@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Project } from './types/portfolio';
 import { PortfolioDataProvider } from './context/PortfolioDataContext';
 import { useLenisSmoothScroll } from './hooks/useLenisSmoothScroll';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { NavigationBar } from './components/navigation/NavigationBar';
 import { HeroSection } from './components/hero/HeroSection';
 import { WelcomeAnimation } from './components/hero/WelcomeAnimation';
@@ -15,13 +16,20 @@ import { ProjectCaseStudyModal } from './components/projects/ProjectCaseStudyMod
 import { AdminDashboard } from './components/admin/AdminDashboard';
 
 function PortfolioSite() {
+  const { isSunset } = useTheme();
   const [showWelcome, setShowWelcome] = useState(true);
   const [activeModalProject, setActiveModalProject] = useState<Project | null>(null);
 
   useLenisSmoothScroll();
 
   return (
-    <div className="min-h-screen bg-[#fff9d4] text-[#0f172a] selection:bg-[#0284c7] selection:text-white">
+    <div
+      className={`min-h-screen transition-colors duration-500 ${
+        isSunset
+          ? 'bg-[#190f26] text-[#f8fafc] selection:bg-[#ea580c]'
+          : 'bg-[#fff9d4] text-[#0f172a] selection:bg-[#0284c7]'
+      } selection:text-white`}
+    >
       {showWelcome && (
         <WelcomeAnimation onComplete={() => setShowWelcome(false)} />
       )}
@@ -87,13 +95,15 @@ export function App() {
   };
 
   return (
-    <PortfolioDataProvider>
-      {page === 'admin' ? (
-        <AdminDashboard onBack={goToSite} />
-      ) : (
-        <PortfolioSite />
-      )}
-    </PortfolioDataProvider>
+    <ThemeProvider>
+      <PortfolioDataProvider>
+        {page === 'admin' ? (
+          <AdminDashboard onBack={goToSite} />
+        ) : (
+          <PortfolioSite />
+        )}
+      </PortfolioDataProvider>
+    </ThemeProvider>
   );
 }
 

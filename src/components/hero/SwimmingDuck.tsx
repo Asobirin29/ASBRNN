@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 
 export type DuckExpression = 'normal' | 'lifted' | 'impact' | 'happy';
 
@@ -26,6 +27,16 @@ const DUCK_DIALOGUES = [
   'Awas kecipratan air ya kalau aku lagi ngebut berenang!'
 ];
 
+const DUCK_SUNSET_DIALOGUES = [
+  '♪ Kwek kwek, sunset di pantai indah banget ya ~',
+  'Air lautnya jadi hangat keemasan kena pantulan senja!',
+  'Berenang sore-sore pas sunset vibes-nya juara banget kwek!',
+  'Mataharinya bulat oranye gede banget di tengah laut!',
+  'Kepiting! Udahan main volinya, yuk liat sunset bareng!',
+  'Kwek! Kalau lagi penat ngoding, liat pemandangan senja pantai ini bikin adem ~',
+  'Suasana senja gini enaknya santai sambil dengerin deburan ombak ~'
+];
+
 const createShuffledDeck = (items: string[], lastItem?: string): string[] => {
   const deck = [...items];
   for (let i = deck.length - 1; i > 0; i--) {
@@ -45,13 +56,18 @@ export const SwimmingDuck: React.FC<SwimmingDuckProps> = ({
   onDuckSplash,
   onDuckWaddle
 }) => {
+  const { isSunset } = useTheme();
   const [isGrabbed, setIsGrabbed] = useState(false);
   const [isWaddling, setIsWaddling] = useState(false);
   const [isBlinking, setIsBlinking] = useState(false);
   const [currentQuip, setCurrentQuip] = useState<string | null>(null);
 
-  const deckRef = useRef<string[]>(createShuffledDeck(DUCK_DIALOGUES));
+  const deckRef = useRef<string[]>(createShuffledDeck(isSunset ? DUCK_SUNSET_DIALOGUES : DUCK_DIALOGUES));
   const lastQuipRef = useRef<string>('');
+
+  useEffect(() => {
+    deckRef.current = createShuffledDeck(isSunset ? DUCK_SUNSET_DIALOGUES : DUCK_DIALOGUES);
+  }, [isSunset]);
 
   const x = useMotionValue(-120);
   const y = useMotionValue(0);
@@ -109,9 +125,24 @@ export const SwimmingDuck: React.FC<SwimmingDuckProps> = ({
     return () => clearInterval(quipInterval);
   }, [isGrabbed, isWaddling]);
 
+  const [isInView, setIsInView] = useState(true);
+
+  useEffect(() => {
+    const el = duckRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.02 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // swimming loop across the screen with collision check
   useEffect(() => {
-    if (isGrabbed || isWaddling) return;
+    if (isGrabbed || isWaddling || !isInView) return;
 
     let animId: number;
     let lastTime = performance.now();
@@ -132,8 +163,8 @@ export const SwimmingDuck: React.FC<SwimmingDuckProps> = ({
 
       x.set(nextX);
 
-      // collision check (every 50ms)
-      if (currentTime - lastCollisionCheck > 50 && duckRef.current) {
+      // throttled collision check (every 120ms)
+      if (currentTime - lastCollisionCheck > 120 && duckRef.current) {
         lastCollisionCheck = currentTime;
         const rect = duckRef.current.getBoundingClientRect();
         if (rect.right > 0 && rect.left < window.innerWidth) {
@@ -146,7 +177,7 @@ export const SwimmingDuck: React.FC<SwimmingDuckProps> = ({
 
     animId = requestAnimationFrame(swimLoop);
     return () => cancelAnimationFrame(animId);
-  }, [isGrabbed, isWaddling, onDuckSwim, x]);
+  }, [isGrabbed, isWaddling, isInView, onDuckSwim, x]);
 
   // moving upward back into shallow water
   useEffect(() => {
@@ -420,7 +451,11 @@ export const SwimmingDuck: React.FC<SwimmingDuckProps> = ({
             initial={{ opacity: 0, scale: 0.75, y: 6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.75, y: 6 }}
-            className="absolute -top-10 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-2xl bg-white/95 text-[#02587a] text-xs font-bold shadow-xl border border-[#38bdf8] whitespace-nowrap flex items-center gap-1.5 backdrop-blur-md"
+            className={`absolute -top-10 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-2xl text-xs font-bold shadow-xl whitespace-nowrap flex items-center gap-1.5 backdrop-blur-md ${
+              isSunset
+                ? 'bg-[#25122e]/95 text-amber-200 border border-orange-400 shadow-[0_4px_16px_rgba(249,115,22,0.45)]'
+                : 'bg-white/95 text-[#02587a] border border-[#38bdf8]'
+            }`}
           >
             <span className="drop-shadow-xs">{currentQuip}</span>
           </motion.div>

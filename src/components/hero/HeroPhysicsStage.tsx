@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import type { DuckExpression } from './SwimmingDuck';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export interface HeroPhysicsStageHandle {
   handleDuckDrop: (clientX: number, clientY: number, velocity: number) => void;
@@ -49,6 +50,7 @@ interface HeroPhysicsStageProps {
 export const HeroPhysicsStage = forwardRef<HeroPhysicsStageHandle, HeroPhysicsStageProps>(
   ({ onSplash, onRipple, onDuckExpressionChange }, ref) => {
     const { profile } = usePortfolioData();
+    const { isSunset } = useTheme();
     const name = profile?.name || 'Ahmad Sobirin';
 
     const [letters, setLetters] = useState<LetterData[]>(() => buildLettersFromName(name));
@@ -193,12 +195,30 @@ export const HeroPhysicsStage = forwardRef<HeroPhysicsStageHandle, HeroPhysicsSt
       }, 600);
     };
 
+    const stageContainerRef = useRef<HTMLDivElement | null>(null);
+
     const handleDuckSwim = (duckX: number, duckY: number) => {
       // ripple rate
       const now = performance.now();
-      if (now - lastRippleTimeRef.current > 380) {
+      if (now - lastRippleTimeRef.current > 420) {
         lastRippleTimeRef.current = now;
         onRipple(duckX, duckY, 45);
+      }
+
+      const container = stageContainerRef.current;
+      if (!container) return;
+      const cRect = container.getBoundingClientRect();
+      const isMobile = typeof window !== 'undefined' ? window.innerWidth < 640 : false;
+      const hitThreshold = isMobile ? 55 : 105;
+
+      // Quick bounding-box exclusion: if duck is not within reach of the text block, bail out immediately!
+      if (
+        duckX < cRect.left - hitThreshold ||
+        duckX > cRect.right + hitThreshold ||
+        duckY < cRect.top - hitThreshold ||
+        duckY > cRect.bottom + hitThreshold
+      ) {
+        return;
       }
 
       let didHitLetter = false;
@@ -218,8 +238,6 @@ export const HeroPhysicsStage = forwardRef<HeroPhysicsStageHandle, HeroPhysicsSt
           const dy = letterCenterY - duckY;
           const dist = Math.sqrt(dx ** 2 + dy ** 2);
 
-          const isMobile = typeof window !== 'undefined' ? window.innerWidth < 640 : false;
-          const hitThreshold = isMobile ? 55 : 105;
           const maxDisplacement = isMobile ? 18 : 45;
 
           if (dist < hitThreshold && dist > 0) {
@@ -324,29 +342,49 @@ export const HeroPhysicsStage = forwardRef<HeroPhysicsStageHandle, HeroPhysicsSt
             }}
             className="relative"
           >
-            <div className="absolute -bottom-4 left-1 right-1 h-4 bg-[#c4ad82]/40 rounded-full blur-[4px] transform scale-y-50" />
-            <div className="absolute -bottom-3 left-2 right-2 h-3 bg-[#0284c7]/50 rounded-full blur-[3px]" />
+            <div
+              className={`absolute -bottom-4 left-1 right-1 h-4 rounded-full blur-[4px] transform scale-y-50 ${
+                isSunset ? 'bg-[#ea580c]/30' : 'bg-[#c4ad82]/40'
+              }`}
+            />
+            <div
+              className={`absolute -bottom-3 left-2 right-2 h-3 rounded-full blur-[3px] ${
+                isSunset ? 'bg-[#f97316]/60' : 'bg-[#0284c7]/50'
+              }`}
+            />
 
             <span
-              className="absolute top-1 sm:top-2 left-0.5 text-[40px] min-[390px]:text-[48px] sm:text-7xl md:text-8xl font-black text-[#041628] tracking-tight select-none pointer-events-none"
+              className={`absolute top-1 sm:top-2 left-0.5 text-[40px] min-[390px]:text-[48px] sm:text-7xl md:text-8xl font-black tracking-tight select-none pointer-events-none ${
+                isSunset ? 'text-[#1c0818]' : 'text-[#041628]'
+              }`}
               aria-hidden="true"
             >
               {letter.char}
             </span>
             <span
-              className="absolute top-0.5 sm:top-1.5 left-0.5 text-[40px] min-[390px]:text-[48px] sm:text-7xl md:text-8xl font-black text-[#0369a1] tracking-tight select-none pointer-events-none"
+              className={`absolute top-0.5 sm:top-1.5 left-0.5 text-[40px] min-[390px]:text-[48px] sm:text-7xl md:text-8xl font-black tracking-tight select-none pointer-events-none ${
+                isSunset ? 'text-[#881337]' : 'text-[#0369a1]'
+              }`}
               aria-hidden="true"
             >
               {letter.char}
             </span>
             <span
-              className="absolute top-0.5 left-0 text-[40px] min-[390px]:text-[48px] sm:text-7xl md:text-8xl font-black text-[#0284c7] tracking-tight select-none pointer-events-none"
+              className={`absolute top-0.5 left-0 text-[40px] min-[390px]:text-[48px] sm:text-7xl md:text-8xl font-black tracking-tight select-none pointer-events-none ${
+                isSunset ? 'text-[#ea580c]' : 'text-[#0284c7]'
+              }`}
               aria-hidden="true"
             >
               {letter.char}
             </span>
 
-            <span className="relative z-10 block text-[40px] min-[390px]:text-[48px] sm:text-7xl md:text-8xl font-black text-white tracking-tight drop-shadow-[0_6px_16px_rgba(2,132,199,0.35)]">
+            <span
+              className={`relative z-10 block text-[40px] min-[390px]:text-[48px] sm:text-7xl md:text-8xl font-black tracking-tight ${
+                isSunset
+                  ? 'text-[#fff7ed] drop-shadow-[0_6px_20px_rgba(249,115,22,0.65)]'
+                  : 'text-white drop-shadow-[0_6px_16px_rgba(2,132,199,0.35)]'
+              }`}
+            >
               {letter.char}
             </span>
           </motion.div>
@@ -356,7 +394,10 @@ export const HeroPhysicsStage = forwardRef<HeroPhysicsStageHandle, HeroPhysicsSt
 
     return (
       <div className="relative z-20 w-full flex flex-col items-center justify-center">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-y-0.5 sm:gap-y-0 gap-x-4 sm:gap-x-8 md:gap-x-10 py-1 sm:py-6 max-w-full px-1">
+        <div
+          ref={stageContainerRef}
+          className="flex flex-col sm:flex-row items-center justify-center gap-y-0.5 sm:gap-y-0 gap-x-4 sm:gap-x-8 md:gap-x-10 py-1 sm:py-6 max-w-full px-1"
+        >
           {wordsList.map((wordLetters, wIdx) => (
             <div key={wIdx} className="flex items-center justify-center">
               {wordLetters.map(renderLetter)}

@@ -31,3 +31,6 @@ skills-lock.json
 
 # Environment and local flakes
 .direnv
+
+# Performance backups
+backups_perf/

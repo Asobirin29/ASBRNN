@@ -5,6 +5,8 @@ import { SiGithub } from '@icons-pack/react-simple-icons';
 import { useGithubContributions } from '../../hooks/useGithubContributions';
 import { GithubHeatmapGrid } from './GithubHeatmapGrid';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { useTheme } from '../../context/ThemeContext';
+import { MrKrabsGithub } from '../spongebob/MrKrabsGithub';
 
 const formatIndonesianDateShort = (dateString: string): string => {
   const date = new Date(dateString);
@@ -15,6 +17,7 @@ const formatIndonesianDateShort = (dateString: string): string => {
 
 export const GithubActivitySection: React.FC = () => {
   const { profile: profileData } = usePortfolioData();
+  const { isSunset } = useTheme();
   // extract github username from profile data url
   const githubUrl = profileData.contact.github || 'https://github.com/ryhndastra';
   const username = githubUrl.split('/').filter(Boolean).pop() || 'ryhndastra';
@@ -27,7 +30,14 @@ export const GithubActivitySection: React.FC = () => {
   };
 
   return (
-    <section id="activity" className="relative -mt-2 pt-28 pb-24 sm:pt-36 sm:pb-32 bg-gradient-to-b from-[#edd69a] via-[#f2e0aa] to-[#f2e0aa] overflow-hidden select-none z-20">
+    <section
+      id="activity"
+      className={`relative scroll-mt-24 -mt-2 pt-28 pb-24 sm:pt-36 sm:pb-32 overflow-hidden select-none z-20 transition-colors duration-500 ${
+        isSunset
+          ? 'bg-gradient-to-b from-[#211233] via-[#1c0d2b] to-[#1c0d2b]'
+          : 'bg-gradient-to-b from-[#edd69a] via-[#f2e0aa] to-[#f2e0aa]'
+      }`}
+    >
       {/* organic coastal sand dune boundary transition */}
       <div className="absolute top-0 inset-x-0 h-16 sm:h-24 pointer-events-none overflow-hidden z-0">
         <svg
@@ -39,12 +49,12 @@ export const GithubActivitySection: React.FC = () => {
         >
           <path
             d="M-40,0 L1480,0 L1480,24 C1120,68 760,12 380,56 C200,78 60,32 -40,58 Z"
-            fill="#e5ce8f"
+            fill={isSunset ? '#2e1945' : '#e5ce8f'}
             opacity="0.65"
           />
           <path
             d="M-40,0 L1480,0 L1480,14 C1160,48 780,6 400,38 C210,54 70,22 -40,42 Z"
-            fill="#edd69a"
+            fill={isSunset ? '#211233' : '#edd69a'}
           />
         </svg>
       </div>
@@ -56,20 +66,39 @@ export const GithubActivitySection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ type: 'spring', stiffness: 220, damping: 24 }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 sm:pb-14 border-b border-[#0f172a]/15"
+          className={`flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 sm:pb-14 border-b ${
+            isSunset ? 'border-orange-500/25' : 'border-[#0f172a]/15'
+          }`}
         >
           <div className="max-w-2xl">
-            <span className="text-xs font-mono font-bold uppercase tracking-[0.25em] text-[#8c6239] block mb-2">
+            <span
+              className={`text-xs font-mono font-bold uppercase tracking-[0.25em] block mb-2 ${
+                isSunset ? 'text-amber-400' : 'text-[#8c6239]'
+              }`}
+            >
               AKTIVITAS GITHUB
             </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-[#0f172a] tracking-tight leading-[1.08]">
+            <h2
+              className={`text-3xl sm:text-5xl font-black tracking-tight leading-[1.08] ${
+                isSunset ? 'text-white' : 'text-[#0f172a]'
+              }`}
+            >
               Kontribusi &amp; Aktivitas Kode
             </h2>
           </div>
 
-          <p className="max-w-md text-xs sm:text-sm font-medium text-[#475569] leading-relaxed">
-            Rekam jejak commit, kontribusi open source, dan konsistensi pengembangan kode di GitHub.
-          </p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            {/* Mr. Krabs Profit & Commit Motivator */}
+            <MrKrabsGithub totalCommits={stats?.totalContributions || 112} />
+
+            <p
+              className={`max-w-md text-xs sm:text-sm font-medium leading-relaxed ${
+                isSunset ? 'text-slate-300' : 'text-[#475569]'
+              }`}
+            >
+              Rekam jejak commit, kontribusi open source, dan konsistensi pengembangan kode di GitHub.
+            </p>
+          </div>
         </motion.div>
 
         {/* master bento dock card */}
@@ -78,22 +107,40 @@ export const GithubActivitySection: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.15 }}
           transition={{ type: 'spring', stiffness: 200, damping: 22, delay: 0.1 }}
-          className="mt-8 sm:mt-12 rounded-[24px] sm:rounded-[32px] p-4 sm:p-9 bg-[#fffdf5] border-2 border-[#0f172a] shadow-[4px_4px_0px_#0f172a] sm:shadow-[6px_6px_0px_#0f172a]"
+          className={`mt-8 sm:mt-12 rounded-[24px] sm:rounded-[32px] p-4 sm:p-9 border-2 transition-colors duration-500 ${
+            isSunset
+              ? 'bg-[#231234] border-orange-500/40 shadow-[4px_4px_0px_#ea580c] sm:shadow-[6px_6px_0px_#ea580c]'
+              : 'bg-[#fffdf5] border-[#0f172a] shadow-[4px_4px_0px_#0f172a] sm:shadow-[6px_6px_0px_#0f172a]'
+          }`}
         >
           {/* control bar with clean username and year pills */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-[#e8dbc0]">
+          <div
+            className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b ${
+              isSunset ? 'border-orange-500/25' : 'border-[#e8dbc0]'
+            }`}
+          >
             <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-2.5 w-full sm:w-auto">
               <a
                 href={githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl bg-[#fff9d4] hover:bg-[#fff0b3] border-2 border-[#0f172a] text-[#0f172a] text-xs font-mono font-bold shadow-[2px_2px_0px_#0f172a] transition-all hover:-translate-y-0.5"
+                className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl border-2 text-xs font-mono font-bold transition-all hover:-translate-y-0.5 ${
+                  isSunset
+                    ? 'bg-[#1b0c26] text-amber-200 border-orange-500/40 shadow-[2px_2px_0px_#ea580c]'
+                    : 'bg-[#fff9d4] hover:bg-[#fff0b3] border-[#0f172a] text-[#0f172a] shadow-[2px_2px_0px_#0f172a]'
+                }`}
               >
-                <SiGithub className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0f172a]" />
+                <SiGithub className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isSunset ? 'text-amber-300' : 'text-[#0f172a]'}`} />
                 <span>@{username}</span>
               </a>
 
-              <span className="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-[#fffdf5] border-2 border-[#0f172a] text-[11px] sm:text-xs font-mono font-bold text-[#8c6239] shadow-[2px_2px_0px_#0f172a]">
+              <span
+                className={`px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl border-2 text-[11px] sm:text-xs font-mono font-bold ${
+                  isSunset
+                    ? 'bg-[#1b0c26] border-orange-500/40 text-amber-300 shadow-[2px_2px_0px_#ea580c]'
+                    : 'bg-[#fffdf5] border-[#0f172a] text-[#8c6239] shadow-[2px_2px_0px_#0f172a]'
+                }`}
+              >
                 {stats.totalContributions.toLocaleString('id-ID')} Kontribusi
               </span>
             </div>
@@ -109,8 +156,12 @@ export const GithubActivitySection: React.FC = () => {
                     onClick={() => setSelectedYear(yearKey)}
                     className={`px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-mono font-bold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                       isActive
-                        ? 'bg-[#0284c7] text-white shadow-[2px_2px_0px_#0f172a] border-2 border-[#0f172a] -translate-y-0.5'
-                        : 'bg-[#fff9d4] text-[#475569] hover:bg-[#faeed1] hover:text-[#0f172a] border-2 border-[#0f172a] hover:-translate-y-0.5 shadow-[2px_2px_0px_#0f172a]'
+                        ? isSunset
+                          ? 'bg-[#ea580c] text-white shadow-[2px_2px_0px_#f97316] border-2 border-orange-400 -translate-y-0.5'
+                          : 'bg-[#0284c7] text-white shadow-[2px_2px_0px_#0f172a] border-2 border-[#0f172a] -translate-y-0.5'
+                        : isSunset
+                          ? 'bg-[#1b0c26] text-amber-100 hover:bg-[#2e1540] border-2 border-orange-500/35 shadow-[2px_2px_0px_#ea580c] hover:-translate-y-0.5'
+                          : 'bg-[#fff9d4] text-[#475569] hover:bg-[#faeed1] hover:text-[#0f172a] border-2 border-[#0f172a] hover:-translate-y-0.5 shadow-[2px_2px_0px_#0f172a]'
                     }`}
                   >
                     {formatYearLabel(yearKey)}

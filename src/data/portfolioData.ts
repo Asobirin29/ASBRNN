@@ -1,25 +1,25 @@
 import type { ProfileData, Project, TechItem, ExperienceItem } from '../types/portfolio';
 
 export const profileData: ProfileData = {
-  name: 'Ahmad Sobirin',
-  tagline: 'Full-Stack & Mobile Developer',
-  education: 'Teknik Informatika (S1)',
-  status: 'Available for Engineering Roles & Projects',
-  bio: 'Developer yang berfokus pada pembangunan platform web modern, aplikasi mobile, dan arsitektur sistem yang skalabel, efisien, dan andal.',
-  experienceStart: 'Active Developer',
-  avatarUrl: '/avatar.svg',
-  interests: [
-    'Web Architecture',
-    'Mobile Systems',
-    'Linux Ecosystem',
-    'Software Reliability',
-    'Reactive Interfaces'
+  "name": "Ahmad Sobirin",
+  "tagline": "Full-Stack & Mobile Developer",
+  "education": "Teknik Informatika (S1)",
+  "status": "Available for Engineering Roles & Projects",
+  "bio": "Developer yang berfokus pada pembangunan platform web modern, aplikasi mobile, dan arsitektur sistem yang skalabel, efisien, dan andal.",
+  "experienceStart": "Active Developer",
+  "avatarUrl": "/avatar.svg",
+  "interests": [
+    "Web Architecture",
+    "Mobile Systems",
+    "Linux Ecosystem",
+    "Software Reliability",
+    "Reactive Interfaces"
   ],
-  contact: {
-    email: 'ahmedsobirin950@gmail.com',
-    github: 'https://github.com/Asobirin29',
-    linkedin: 'https://linkedin.com',
-    location: 'Indonesia'
+  "contact": {
+    "email": "ahmedsobirin950@gmail.com",
+    "github": "https://github.com/Asobirin29",
+    "linkedin": "https://linkedin.com",
+    "location": "Indonesia"
   }
 };
 
@@ -279,6 +279,9 @@ export const projectsData: Project[] = [
     "isPrivateRepo": true,
     "privateRepoReason": "Repository privat karena hak cipta institusi & kerahasiaan data",
     "imageUrl": "/projects/CibendaMart.png",
+    "images": [
+      "/projects/CibendaMart.png"
+    ],
     "imageFit": "cover",
     "featured": true,
     "metrics": [
@@ -327,6 +330,9 @@ export const projectsData: Project[] = [
     "isMobileApp": true,
     "demoStatusLabel": "Aplikasi Mobile Native (Demo/APK on request)",
     "imageUrl": "/projects/villa.png",
+    "images": [
+      "/projects/villa.png"
+    ],
     "imageFit": "contain",
     "featured": true,
     "metrics": [
@@ -379,6 +385,9 @@ export const projectsData: Project[] = [
     "githubUrl": "https://github.com/ryhndastra/kalorin-ai",
     "demoUrl": "https://kalorin-ai.vercel.app",
     "imageUrl": "/projects/kalorinLogo.png",
+    "images": [
+      "/projects/kalorinLogo.png"
+    ],
     "imageFit": "contain",
     "featured": true,
     "metrics": [

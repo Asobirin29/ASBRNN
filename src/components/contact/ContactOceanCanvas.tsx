@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface SplashDroplet {
   x: number;
@@ -21,6 +22,13 @@ interface WaterRipple {
 }
 
 export const ContactOceanCanvas: React.FC = () => {
+  const { isSunset } = useTheme();
+  const isSunsetRef = useRef(isSunset);
+
+  useEffect(() => {
+    isSunsetRef.current = isSunset;
+  }, [isSunset]);
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const dropletsRef = useRef<SplashDroplet[]>([]);
   const ripplesRef = useRef<WaterRipple[]>([]);
@@ -31,7 +39,9 @@ export const ContactOceanCanvas: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animId: number;
+    let animId: number | null = null;
+    let isRunning = true;
+    let isVisible = false;
     let time = 0;
 
     // rising bubbles
@@ -111,19 +121,27 @@ export const ContactOceanCanvas: React.FC = () => {
     }
 
     const render = () => {
-      if (!ctx || !canvas) return;
+      if (!isRunning || !ctx || !canvas || !isVisible) return;
       const width = canvas.width;
       const height = canvas.height;
 
       ctx.clearRect(0, 0, width, height);
       time += 0.016;
+      const sunset = isSunsetRef.current;
 
       // water body gradient matching journey timeline
       const waterGrad = ctx.createLinearGradient(0, 0, 0, height);
-      waterGrad.addColorStop(0, '#02587a');
-      waterGrad.addColorStop(0.35, '#024968');
-      waterGrad.addColorStop(0.85, '#013852');
-      waterGrad.addColorStop(1.0, '#01283c');
+      if (sunset) {
+        waterGrad.addColorStop(0, '#1c0d2b');
+        waterGrad.addColorStop(0.35, '#280f38');
+        waterGrad.addColorStop(0.85, '#190824');
+        waterGrad.addColorStop(1.0, '#0e0316');
+      } else {
+        waterGrad.addColorStop(0, '#02587a');
+        waterGrad.addColorStop(0.35, '#024968');
+        waterGrad.addColorStop(0.85, '#013852');
+        waterGrad.addColorStop(1.0, '#01283c');
+      }
       ctx.fillStyle = waterGrad;
       ctx.fillRect(0, 0, width, height);
 
@@ -144,9 +162,15 @@ export const ContactOceanCanvas: React.FC = () => {
         ctx.restore();
       };
 
-      drawWaveCrest(height * 0.20, 0.005, 8, 1.0, 0.35, '#38bdf8');
-      drawWaveCrest(height * 0.50, 0.004, 10, 0.8, 0.30, '#0ea5e9');
-      drawWaveCrest(height * 0.75, 0.004, 9, 0.7, 0.25, '#7dd3fc');
+      if (sunset) {
+        drawWaveCrest(height * 0.20, 0.005, 8, 1.0, 0.40, '#f97316');
+        drawWaveCrest(height * 0.50, 0.004, 10, 0.8, 0.35, '#ea580c');
+        drawWaveCrest(height * 0.75, 0.004, 9, 0.7, 0.30, '#f59e0b');
+      } else {
+        drawWaveCrest(height * 0.20, 0.005, 8, 1.0, 0.35, '#38bdf8');
+        drawWaveCrest(height * 0.50, 0.004, 10, 0.8, 0.30, '#0ea5e9');
+        drawWaveCrest(height * 0.75, 0.004, 9, 0.7, 0.25, '#7dd3fc');
+      }
 
       // fish
       const drawFish = (fx: number, fy: number, size: number, color: string, flip: boolean) => {
@@ -273,9 +297,15 @@ export const ContactOceanCanvas: React.FC = () => {
       const seabedY = height * 0.88;
       ctx.save();
       const seabedGrad = ctx.createLinearGradient(0, seabedY, 0, height);
-      seabedGrad.addColorStop(0, '#f0dc9f');
-      seabedGrad.addColorStop(0.5, '#ebdcae');
-      seabedGrad.addColorStop(1.0, '#dfcca8');
+      if (sunset) {
+        seabedGrad.addColorStop(0, '#231234');
+        seabedGrad.addColorStop(0.5, '#1b0c28');
+        seabedGrad.addColorStop(1.0, '#14081e');
+      } else {
+        seabedGrad.addColorStop(0, '#f0dc9f');
+        seabedGrad.addColorStop(0.5, '#ebdcae');
+        seabedGrad.addColorStop(1.0, '#dfcca8');
+      }
       ctx.fillStyle = seabedGrad;
 
       ctx.beginPath();
@@ -298,14 +328,34 @@ export const ContactOceanCanvas: React.FC = () => {
       animId = requestAnimationFrame(render);
     };
 
-    animId = requestAnimationFrame(render);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const visible = entry.isIntersecting;
+        if (visible && !isVisible) {
+          isVisible = true;
+          if (!animId) {
+            animId = requestAnimationFrame(render);
+          }
+        } else if (!visible && isVisible) {
+          isVisible = false;
+          if (animId) {
+            cancelAnimationFrame(animId);
+            animId = null;
+          }
+        }
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(canvas);
 
     return () => {
-      cancelAnimationFrame(animId);
+      isRunning = false;
+      if (animId) cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
       if (parent) {
         parent.removeEventListener('click', handleClick);
       }
+      observer.disconnect();
     };
   }, []);
 

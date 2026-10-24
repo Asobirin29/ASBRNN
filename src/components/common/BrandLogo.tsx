@@ -1,5 +1,6 @@
 import React from 'react';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { useTheme } from '../../context/ThemeContext';
 
 interface BrandLogoProps {
   className?: string;
@@ -13,6 +14,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   withText = false
 }) => {
   const { profile } = usePortfolioData();
+  const { isSunset } = useTheme();
   const sizeMap = {
     sm: { img: 'w-8 h-8', text: 'text-xs' },
     md: { img: 'w-10 h-10', text: 'text-sm' },
@@ -44,7 +46,11 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           <span className={`font-bold text-white tracking-wide leading-tight drop-shadow-sm ${currentSize.text}`}>
             {name}
           </span>
-          <span className="text-[11px] text-[#fff9d4] font-mono font-medium flex items-center gap-1 drop-shadow-xs truncate max-w-[200px]">
+          <span
+            className={`text-[11px] font-mono font-medium flex items-center gap-1 drop-shadow-xs truncate max-w-[200px] ${
+              isSunset ? 'text-amber-200' : 'text-[#fff9d4]'
+            }`}
+          >
             &gt;_ {tagline}
           </span>
         </div>

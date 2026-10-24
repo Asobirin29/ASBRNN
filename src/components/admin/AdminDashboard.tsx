@@ -5,7 +5,8 @@ import {
   ArrowLeft, Save, RotateCcw, User, FolderOpen, Cpu, Briefcase,
   Plus, Trash2, ChevronDown, ChevronUp, X, Eye, LogOut,
   Upload, Download, Copy, Database, Search,
-  Layers, HardDrive, CheckCircle2, AlertCircle, Sparkles, Image as ImageIcon
+  Layers, HardDrive, CheckCircle2, AlertCircle, Sparkles, Image as ImageIcon,
+  Star, ChevronLeft, ChevronRight, Images, UploadCloud
 } from 'lucide-react';
 
 /* ───────── Toast Notification ───────── */
@@ -187,6 +188,297 @@ const ImageUploadField: React.FC<{
             <span className="text-[11px] text-[#64748b]">Format: JPG, PNG, WEBP, SVG</span>
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+/* ══════════════════════════════════════════════
+   PROJECT MULTI-IMAGE GALLERY MANAGER
+   ══════════════════════════════════════════════ */
+const ProjectGalleryUploadField: React.FC<{
+  images: string[];
+  imageUrl: string;
+  onImagesChange: (images: string[], primaryUrl: string) => void;
+  onUploadImage: (file: File) => Promise<{ success: boolean; url?: string; error?: string }>;
+  showToast: (msg: string, type?: 'success' | 'error') => void;
+}> = ({ images, imageUrl, onImagesChange, onUploadImage, showToast }) => {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>('');
+  const [customUrlInput, setCustomUrlInput] = useState('');
+
+  const currentList = Array.isArray(images) && images.length > 0
+    ? images
+    : (imageUrl ? [imageUrl] : []);
+
+  const handleMultipleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    const newUrls: string[] = [];
+    const total = files.length;
+
+    for (let i = 0; i < total; i++) {
+      setUploadProgress(`Mengunggah foto ${i + 1} dari ${total}...`);
+      try {
+        const res = await onUploadImage(files[i]);
+        if (res.success && res.url) {
+          newUrls.push(res.url);
+        } else {
+          showToast(res.error || `Gagal mengunggah foto ${files[i].name}`, 'error');
+        }
+      } catch {
+        showToast(`Gagal memproses ${files[i].name}`, 'error');
+      }
+    }
+
+    setUploading(false);
+    setUploadProgress('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+
+    if (newUrls.length > 0) {
+      const merged = [...currentList, ...newUrls];
+      onImagesChange(merged, merged[0]);
+      showToast(`${newUrls.length} foto berhasil diunggah ke proyek!`);
+    }
+  };
+
+  const handleAddCustomUrl = () => {
+    const trimmed = customUrlInput.trim();
+    if (!trimmed) return;
+    const merged = [...currentList, trimmed];
+    onImagesChange(merged, merged[0]);
+    setCustomUrlInput('');
+    showToast('Foto ditambahkan ke galeri!');
+  };
+
+  const handleSetPrimary = (index: number) => {
+    if (index === 0) return;
+    const item = currentList[index];
+    const rest = currentList.filter((_, i) => i !== index);
+    const reordered = [item, ...rest];
+    onImagesChange(reordered, item);
+    showToast('Sampul utama proyek diperbarui!');
+  };
+
+  const handleMove = (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= currentList.length) return;
+    const nextList = [...currentList];
+    const temp = nextList[index];
+    nextList[index] = nextList[targetIndex];
+    nextList[targetIndex] = temp;
+    onImagesChange(nextList, nextList[0]);
+  };
+
+  const handleDelete = (index: number) => {
+    const nextList = currentList.filter((_, i) => i !== index);
+    onImagesChange(nextList, nextList[0] || '');
+    showToast('Foto dihapus dari galeri');
+  };
+
+  const handleUpdateUrl = (index: number, newUrl: string) => {
+    const nextList = [...currentList];
+    nextList[index] = newUrl;
+    onImagesChange(nextList, nextList[0] || '');
+  };
+
+  return (
+    <div className="space-y-3 p-4 sm:p-5 rounded-2xl bg-[#0f172a] border border-[#334155]">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1e293b] pb-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <Images className="w-4 h-4 text-sky-400" />
+            <h4 className="text-sm font-bold text-white tracking-wide">
+              Galeri &amp; Screenshot Proyek ({currentList.length} Foto)
+            </h4>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold">
+              MULTI-PHOTO
+            </span>
+          </div>
+          <p className="text-xs text-[#94a3b8] mt-1">
+            Upload beberapa foto agar klien, HRD &amp; pengguna bisa melihat alur aplikasi secara lengkap di frontend.
+          </p>
+        </div>
+
+        {/* Upload Button */}
+        <div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleMultipleFilesChange}
+            multiple
+            accept="image/*"
+            className="hidden"
+          />
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-all shadow-md shadow-sky-600/25 cursor-pointer disabled:opacity-50"
+          >
+            <UploadCloud className="w-4 h-4" />
+            <span>{uploading ? (uploadProgress || 'Mengunggah...') : 'Upload Foto (Bisa Banyak Sekaligus)'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Quick URL Adder */}
+      <div className="flex items-center gap-2 pt-1">
+        <input
+          className={inputClass + ' text-xs py-2'}
+          placeholder="Atau tempel path/URL foto (e.g. /projects/screenshot-2.png atau https://...)"
+          value={customUrlInput}
+          onChange={(e) => setCustomUrlInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleAddCustomUrl();
+            }
+          }}
+        />
+        <button
+          type="button"
+          onClick={handleAddCustomUrl}
+          disabled={!customUrlInput.trim()}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#1e293b] hover:bg-[#334155] border border-[#334155] text-xs font-semibold text-white transition-all cursor-pointer disabled:opacity-50 shrink-0"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>Tambah URL</span>
+        </button>
+      </div>
+
+      {/* Photos Grid */}
+      {currentList.length === 0 ? (
+        <div className="p-6 rounded-xl border border-dashed border-[#334155] bg-[#1e293b]/50 text-center">
+          <ImageIcon className="w-8 h-8 text-[#64748b] mx-auto mb-2" />
+          <p className="text-xs font-semibold text-[#94a3b8]">Belum ada foto yang diunggah untuk proyek ini</p>
+          <p className="text-[11px] text-[#64748b] mt-1">Klik tombol &ldquo;Upload Foto&rdquo; di atas untuk memilih foto dari komputer kamu.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-2">
+          {currentList.map((photoUrl, idx) => {
+            const isPrimary = idx === 0;
+
+            return (
+              <div
+                key={idx}
+                className={`group relative rounded-xl border p-3 flex flex-col justify-between gap-2.5 transition-all ${
+                  isPrimary
+                    ? 'bg-sky-950/30 border-sky-500/50 ring-1 ring-sky-500/30'
+                    : 'bg-[#1e293b] border-[#334155] hover:border-[#475569]'
+                }`}
+              >
+                {/* Image Preview & Badges */}
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-[#0f172a] border border-[#334155] flex items-center justify-center">
+                  <img
+                    src={photoUrl}
+                    alt={`Preview #${idx + 1}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/avatar.svg';
+                    }}
+                  />
+
+                  {/* Primary Badge */}
+                  {isPrimary ? (
+                    <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500 text-black text-[10px] font-black shadow-md">
+                      <Star className="w-3 h-3 fill-black" />
+                      <span>SAMPUL UTAMA (#1)</span>
+                    </div>
+                  ) : (
+                    <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/70 text-slate-300 text-[10px] font-mono font-bold">
+                      #{idx + 1}
+                    </div>
+                  )}
+
+                  {/* Hover Quick Set Primary Button (if not primary) */}
+                  {!isPrimary && (
+                    <button
+                      type="button"
+                      onClick={() => handleSetPrimary(idx)}
+                      className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-xs font-bold text-white cursor-pointer"
+                      title="Jadikan Sampul Utama"
+                    >
+                      <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                      <span>Jadikan Sampul</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Path input */}
+                <div>
+                  <input
+                    className="w-full rounded-lg border border-[#334155] bg-[#0f172a] px-2.5 py-1.5 text-[11px] font-mono text-[#94a3b8] focus:text-white focus:outline-none focus:border-sky-500 transition-all truncate"
+                    value={photoUrl}
+                    onChange={(e) => handleUpdateUrl(idx, e.target.value)}
+                    placeholder="/projects/..."
+                    title={photoUrl}
+                  />
+                </div>
+
+                {/* Card Controls */}
+                <div className="flex items-center justify-between pt-1 border-t border-[#334155]/60 text-xs">
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      disabled={idx === 0}
+                      onClick={() => handleMove(idx, -1)}
+                      className="p-1.5 rounded-lg bg-[#0f172a] hover:bg-[#334155] text-[#94a3b8] hover:text-white disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed transition-all"
+                      title="Geser Kiri"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={idx === currentList.length - 1}
+                      onClick={() => handleMove(idx, 1)}
+                      className="p-1.5 rounded-lg bg-[#0f172a] hover:bg-[#334155] text-[#94a3b8] hover:text-white disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed transition-all"
+                      title="Geser Kanan"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    {!isPrimary && (
+                      <button
+                        type="button"
+                        onClick={() => handleSetPrimary(idx)}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-[#0f172a] hover:bg-amber-500/20 text-[#94a3b8] hover:text-amber-400 border border-[#334155] text-[10px] font-semibold transition-all cursor-pointer"
+                        title="Jadikan Foto Sampul Utama"
+                      >
+                        <Star className="w-3 h-3" />
+                        <span>Sampul</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(idx)}
+                      className="p-1.5 rounded-lg bg-[#0f172a] hover:bg-rose-500/20 text-[#94a3b8] hover:text-rose-400 border border-[#334155] hover:border-rose-500/30 cursor-pointer transition-all"
+                      title="Hapus Foto"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Info Tip */}
+      <div className="pt-2 flex items-start gap-2 text-[11px] text-[#64748b]">
+        <span className="text-amber-400 font-bold shrink-0">💡 Note:</span>
+        <span>
+          Foto bertanda <strong>SAMPUL UTAMA (#1)</strong> akan tampil pertama kali di beranda dan kartu proyek. Foto lainnya dapat dijelajahi pengunjung melalui slider interaktif dan galeri layar penuh di modal studi kasus.
+        </span>
       </div>
     </div>
   );
@@ -406,6 +698,7 @@ const ProjectsEditor: React.FC<{
       demoUrl: '',
       githubUrl: '',
       imageUrl: '/avatar.svg',
+      images: ['/avatar.svg'],
       imageFit: 'cover',
       featured: true,
       metrics: [
@@ -424,6 +717,7 @@ const ProjectsEditor: React.FC<{
       id: `${original.id}-copy-${Date.now().toString().slice(-4)}`,
       title: `${original.title} (Salinan)`,
       featured: false,
+      images: original.images ? [...original.images] : (original.imageUrl ? [original.imageUrl] : [])
     };
     const updated = [...data];
     updated.splice(index + 1, 0, copy);
@@ -527,16 +821,19 @@ const ProjectsEditor: React.FC<{
                   <input className={inputClass} value={project.role} onChange={e => updateProject(i, { role: e.target.value })} placeholder="e.g. Lead Full-Stack Engineer" />
                 </div>
 
-                {/* Image upload */}
+                {/* Multi-Image Gallery Manager */}
                 <div className="md:col-span-2">
-                  <ImageUploadField
-                    label="Gambar / Screenshot Proyek"
-                    value={project.imageUrl}
-                    onChange={url => updateProject(i, { imageUrl: url })}
-                    onUpload={onUploadImage}
+                  <ProjectGalleryUploadField
+                    images={project.images || (project.imageUrl ? [project.imageUrl] : [])}
+                    imageUrl={project.imageUrl}
+                    onImagesChange={(newImages, primaryUrl) => {
+                      updateProject(i, {
+                        images: newImages,
+                        imageUrl: primaryUrl || newImages[0] || ''
+                      });
+                    }}
+                    onUploadImage={onUploadImage}
                     showToast={showToast}
-                    placeholder="/projects/sample.png atau URL"
-                    aspect="video"
                   />
                 </div>
 

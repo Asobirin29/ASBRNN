@@ -1,6 +1,14 @@
 import React, { useEffect, useRef } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 export const JourneyOceanCanvas: React.FC = () => {
+  const { isSunset } = useTheme();
+  const isSunsetRef = useRef(isSunset);
+
+  useEffect(() => {
+    isSunsetRef.current = isSunset;
+  }, [isSunset]);
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -9,7 +17,9 @@ export const JourneyOceanCanvas: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animId: number;
+    let animId: number | null = null;
+    let isRunning = true;
+    let isVisible = false;
     let time = 0;
 
     // bubbles
@@ -41,19 +51,27 @@ export const JourneyOceanCanvas: React.FC = () => {
     window.addEventListener('resize', handleResize);
 
     const render = () => {
-      if (!ctx || !canvas) return;
+      if (!isRunning || !ctx || !canvas || !isVisible) return;
       const width = canvas.width;
       const height = canvas.height;
 
       ctx.clearRect(0, 0, width, height);
       time += 0.016;
+      const sunset = isSunsetRef.current;
 
       // water body 
       const waterGrad = ctx.createLinearGradient(0, 0, 0, height);
-      waterGrad.addColorStop(0, '#38bdf8');
-      waterGrad.addColorStop(0.35, '#0284c7');
-      waterGrad.addColorStop(0.80, '#0369a1');
-      waterGrad.addColorStop(1.0, '#02587a');
+      if (sunset) {
+        waterGrad.addColorStop(0, '#ea580c');
+        waterGrad.addColorStop(0.35, '#881337');
+        waterGrad.addColorStop(0.75, '#3b0764');
+        waterGrad.addColorStop(1.0, '#1c0d2b');
+      } else {
+        waterGrad.addColorStop(0, '#38bdf8');
+        waterGrad.addColorStop(0.35, '#0284c7');
+        waterGrad.addColorStop(0.80, '#0369a1');
+        waterGrad.addColorStop(1.0, '#02587a');
+      }
       ctx.fillStyle = waterGrad;
       ctx.fillRect(0, 0, width, height);
 
@@ -61,10 +79,17 @@ export const JourneyOceanCanvas: React.FC = () => {
       const shorelineHeight = Math.min(220, height * 0.18);
       ctx.save();
       const sandGrad = ctx.createLinearGradient(0, 0, 0, shorelineHeight);
-      sandGrad.addColorStop(0, '#f2e0aa');
-      sandGrad.addColorStop(0.3, '#f6e8ba');
-      sandGrad.addColorStop(0.7, '#faeed1');
-      sandGrad.addColorStop(1.0, '#fff9d4');
+      if (sunset) {
+        sandGrad.addColorStop(0, '#1c0d2b');
+        sandGrad.addColorStop(0.3, '#25143a');
+        sandGrad.addColorStop(0.7, '#2c1744');
+        sandGrad.addColorStop(1.0, '#190f26');
+      } else {
+        sandGrad.addColorStop(0, '#f2e0aa');
+        sandGrad.addColorStop(0.3, '#f6e8ba');
+        sandGrad.addColorStop(0.7, '#faeed1');
+        sandGrad.addColorStop(1.0, '#fff9d4');
+      }
       ctx.fillStyle = sandGrad;
 
       ctx.beginPath();
@@ -84,7 +109,7 @@ export const JourneyOceanCanvas: React.FC = () => {
       ctx.closePath();
       ctx.fill();
 
-      // white foam edge
+      // white / golden foam edge
       ctx.beginPath();
       for (let x = -50; x <= width + 50; x += 8) {
         const sy =
@@ -94,7 +119,7 @@ export const JourneyOceanCanvas: React.FC = () => {
         if (x === -50) ctx.moveTo(x, sy);
         else ctx.lineTo(x, sy);
       }
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = sunset ? '#fde047' : '#ffffff';
       ctx.lineWidth = 6;
       ctx.stroke();
       ctx.restore();
@@ -116,9 +141,15 @@ export const JourneyOceanCanvas: React.FC = () => {
         ctx.restore();
       };
 
-      drawWaveCrest(height * 0.32, 0.006, 8, 1.0, 0.45, '#ffffff');
-      drawWaveCrest(height * 0.55, 0.005, 10, 0.8, 0.4, '#e0f2fe');
-      drawWaveCrest(height * 0.78, 0.004, 12, 0.6, 0.35, '#bae6fd');
+      if (sunset) {
+        drawWaveCrest(height * 0.32, 0.006, 8, 1.0, 0.45, '#fef08a');
+        drawWaveCrest(height * 0.55, 0.005, 10, 0.8, 0.4, '#fed7aa');
+        drawWaveCrest(height * 0.78, 0.004, 12, 0.6, 0.35, '#fb923c');
+      } else {
+        drawWaveCrest(height * 0.32, 0.006, 8, 1.0, 0.45, '#ffffff');
+        drawWaveCrest(height * 0.55, 0.005, 10, 0.8, 0.4, '#e0f2fe');
+        drawWaveCrest(height * 0.78, 0.004, 12, 0.6, 0.35, '#bae6fd');
+      }
 
       // swimming fish
       const drawFish = (fx: number, fy: number, size: number, color: string, flip: boolean) => {
@@ -197,11 +228,31 @@ export const JourneyOceanCanvas: React.FC = () => {
       animId = requestAnimationFrame(render);
     };
 
-    animId = requestAnimationFrame(render);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const visible = entry.isIntersecting;
+        if (visible && !isVisible) {
+          isVisible = true;
+          if (!animId) {
+            animId = requestAnimationFrame(render);
+          }
+        } else if (!visible && isVisible) {
+          isVisible = false;
+          if (animId) {
+            cancelAnimationFrame(animId);
+            animId = null;
+          }
+        }
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(canvas);
 
     return () => {
-      cancelAnimationFrame(animId);
+      isRunning = false;
+      if (animId) cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
+      observer.disconnect();
     };
   }, []);
 

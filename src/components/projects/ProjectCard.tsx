@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, Layers } from 'lucide-react';
+import { ArrowUpRight, Layers, Camera } from 'lucide-react';
 import type { Project } from '../../types/portfolio';
 import { TactileCard } from '../ui/TactileCard';
 
@@ -37,10 +37,18 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onSelect }) =
             {categoryLabels[project.category]}
           </span>
 
-          <span className="text-xs font-mono text-[#94a3b8] group-hover:text-[#f8fafc] flex items-center gap-1 transition-colors">
-            <span>Case Study</span>
-            <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </span>
+          <div className="flex items-center gap-2">
+            {project.images && project.images.length > 1 && (
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-sky-950/80 text-sky-400 border border-sky-800/60 flex items-center gap-1">
+                <Camera className="w-3 h-3" />
+                <span>{project.images.length} Foto</span>
+              </span>
+            )}
+            <span className="text-xs font-mono text-[#94a3b8] group-hover:text-[#f8fafc] flex items-center gap-1 transition-colors">
+              <span>Case Study</span>
+              <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </span>
+          </div>
         </div>
 
         {/* Title & Subtitle */}

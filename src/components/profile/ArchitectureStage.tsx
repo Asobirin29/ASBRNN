@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Terminal, Cpu, Code2 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ArchitectureStageProps {
   isFlooded: boolean;
 }
 
 export const ArchitectureStage: React.FC<ArchitectureStageProps> = ({ isFlooded }) => {
+  const { isSunset } = useTheme();
   const [activePillar, setActivePillar] = useState<number>(0);
 
   const pillars = [
@@ -60,7 +62,13 @@ export const ArchitectureStage: React.FC<ArchitectureStageProps> = ({ isFlooded 
       className="w-full flex flex-col gap-6"
     >
       {/* Selector Tabs */}
-      <div className="grid grid-cols-3 gap-2.5 p-1.5 rounded-2xl bg-[#fffdf5] border border-[#e8dbc0] shadow-sm">
+      <div
+        className={`grid grid-cols-3 gap-2.5 p-1.5 rounded-2xl border shadow-sm transition-colors duration-500 ${
+          isSunset
+            ? 'bg-[#231333] border-orange-500/35'
+            : 'bg-[#fffdf5] border-[#e8dbc0]'
+        }`}
+      >
         {pillars.map((pillar, idx) => (
           <motion.button
             key={pillar.id}
@@ -75,14 +83,20 @@ export const ArchitectureStage: React.FC<ArchitectureStageProps> = ({ isFlooded 
                 }
                 : { rotate: 0, y: 0, x: 0 }
             }
-            className={`flex flex-col items-center justify-center p-3 rounded-xl text-center transition-all cursor-pointer ${activePillar === idx
-              ? 'bg-[#0284c7] text-white shadow-md'
-              : 'hover:bg-[#fff9d4] text-[#475569] hover:text-[#0f172a]'
-              }`}
+            className={`flex flex-col items-center justify-center p-3 rounded-xl text-center transition-all cursor-pointer ${
+              activePillar === idx
+                ? isSunset
+                  ? 'bg-[#ea580c] text-white shadow-md shadow-orange-500/35'
+                  : 'bg-[#0284c7] text-white shadow-md'
+                : isSunset
+                  ? 'hover:bg-[#1b0d28] text-slate-300 hover:text-white'
+                  : 'hover:bg-[#fff9d4] text-[#475569] hover:text-[#0f172a]'
+            }`}
           >
             <span
-              className={`text-xs font-mono font-bold block ${activePillar === idx ? 'text-white' : 'text-[#8c6239]'
-                }`}
+              className={`text-xs font-mono font-bold block ${
+                activePillar === idx ? 'text-white' : isSunset ? 'text-amber-400' : 'text-[#8c6239]'
+              }`}
             >
               0{idx + 1}
             </span>
@@ -94,7 +108,13 @@ export const ArchitectureStage: React.FC<ArchitectureStageProps> = ({ isFlooded 
       </div>
 
       {/* Active Pillar */}
-      <div className="relative min-h-[305px] sm:min-h-[315px] rounded-[32px] bg-[#fffdf5] border border-[#e8dbc0] shadow-xl shadow-[#8c6239]/6 overflow-hidden">
+      <div
+        className={`relative min-h-[305px] sm:min-h-[315px] rounded-[32px] border shadow-xl overflow-hidden transition-colors duration-500 ${
+          isSunset
+            ? 'bg-[#231333] border-orange-500/35 shadow-orange-950/20'
+            : 'bg-[#fffdf5] border-[#e8dbc0] shadow-[#8c6239]/6'
+        }`}
+      >
         <motion.div
           key={activePillar}
           initial={{ opacity: 0, y: 12 }}
@@ -105,34 +125,44 @@ export const ArchitectureStage: React.FC<ArchitectureStageProps> = ({ isFlooded 
           <div>
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3.5">
-                <div className="p-3 rounded-2xl bg-[#fff9d4] border border-[#e2d3b3] shadow-sm shrink-0">
+                <div
+                  className={`p-3 rounded-2xl border shadow-sm shrink-0 ${
+                    isSunset
+                      ? 'bg-[#1b0d28] border-orange-500/25'
+                      : 'bg-[#fff9d4] border-[#e2d3b3]'
+                  }`}
+                >
                   {pillars[activePillar].icon}
                 </div>
                 <div>
-                  <span className="text-xs font-mono font-bold text-[#8c6239]">
+                  <span className={`text-xs font-mono font-bold ${isSunset ? 'text-amber-400' : 'text-[#8c6239]'}`}>
                     0{activePillar + 1} // {pillars[activePillar].subtitle}
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-black text-[#0f172a] mt-0.5">
+                  <h3 className={`text-xl sm:text-2xl font-black mt-0.5 ${isSunset ? 'text-white' : 'text-[#0f172a]'}`}>
                     {pillars[activePillar].title}
                   </h3>
                 </div>
               </div>
             </div>
 
-            <p className="mt-4 text-sm sm:text-base text-[#475569] leading-relaxed">
+            <p className={`mt-4 text-sm sm:text-base leading-relaxed ${isSunset ? 'text-slate-300' : 'text-[#475569]'}`}>
               {pillars[activePillar].desc}
             </p>
           </div>
 
-          <div className="pt-4 border-t border-[#e8dbc0]">
-            <span className="text-xs font-mono font-bold text-[#8c6239] block mb-2.5">
+          <div className={`pt-4 border-t ${isSunset ? 'border-orange-500/25' : 'border-[#e8dbc0]'}`}>
+            <span className={`text-xs font-mono font-bold block mb-2.5 ${isSunset ? 'text-amber-400' : 'text-[#8c6239]'}`}>
               TECH STACK:
             </span>
             <div className="flex flex-wrap gap-2">
               {pillars[activePillar].tags.map((t) => (
                 <span
                   key={t}
-                  className="px-3.5 py-1.5 rounded-xl bg-[#fff9d4] text-xs font-mono font-semibold text-[#0f172a] border border-[#e2d3b3] shadow-xs"
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-semibold border shadow-xs ${
+                    isSunset
+                      ? 'bg-[#1b0d28] text-amber-200 border-orange-500/25'
+                      : 'bg-[#fff9d4] text-[#0f172a] border-[#e2d3b3]'
+                  }`}
                 >
                   {t}
                 </span>

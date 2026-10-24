@@ -5,10 +5,18 @@ export function useScrollPosition() {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setScrollY(currentScrollY);
-      setIsScrolled(currentScrollY > 40);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          setScrollY(currentScrollY);
+          setIsScrolled(currentScrollY > 40);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });

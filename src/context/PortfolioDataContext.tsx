@@ -53,6 +53,7 @@ interface PortfolioDataContextValue {
   generateTypeScriptCode: () => string;
   savePermanentToCode: () => Promise<{ success: boolean; message?: string; error?: string }>;
   uploadImage: (file: File) => Promise<{ success: boolean; url?: string; error?: string }>;
+  uploadMultipleImages: (files: FileList | File[]) => Promise<{ success: boolean; urls: string[]; errors: string[] }>;
 }
 
 const PortfolioDataContext = createContext<PortfolioDataContextValue | null>(null);
@@ -61,9 +62,13 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
   const [profile, _setProfile] = useState<ProfileData>(() =>
     loadFromStorage(STORAGE_KEYS.profile, defaultProfile)
   );
-  const [projects, _setProjects] = useState<Project[]>(() =>
-    loadFromStorage(STORAGE_KEYS.projects, defaultProjects)
-  );
+  const [projects, _setProjects] = useState<Project[]>(() => {
+    const rawProjects = loadFromStorage(STORAGE_KEYS.projects, defaultProjects);
+    return rawProjects.map(p => ({
+      ...p,
+      images: Array.isArray(p.images) && p.images.length > 0 ? p.images : (p.imageUrl ? [p.imageUrl] : [])
+    }));
+  });
   const [techStack, _setTechStack] = useState<TechItem[]>(() =>
     loadFromStorage(STORAGE_KEYS.techStack, defaultTech)
   );
@@ -226,6 +231,27 @@ export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, nul
     });
   }, []);
 
+  const uploadMultipleImages = useCallback(async (files: FileList | File[]): Promise<{ success: boolean; urls: string[]; errors: string[] }> => {
+    const urls: string[] = [];
+    const errors: string[] = [];
+    const fileArray = Array.from(files);
+
+    for (const file of fileArray) {
+      const res = await uploadImage(file);
+      if (res.success && res.url) {
+        urls.push(res.url);
+      } else {
+        errors.push(res.error || `Gagal mengunggah ${file.name}`);
+      }
+    }
+
+    return {
+      success: urls.length > 0,
+      urls,
+      errors
+    };
+  }, [uploadImage]);
+
   // Listen for changes from other tabs
   useEffect(() => {
     const handler = (e: StorageEvent) => {
@@ -259,7 +285,8 @@ export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, nul
         exportAllDataJson,
         generateTypeScriptCode,
         savePermanentToCode,
-        uploadImage
+        uploadImage,
+        uploadMultipleImages
       }}
     >
       {children}
