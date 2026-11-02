@@ -24,6 +24,9 @@ function loadFromStorage<T>(key: string, fallback: T): T {
       if (key === STORAGE_KEYS.profile && parsed?.name === 'Reyhand Astra') {
         return fallback;
       }
+      if (key === STORAGE_KEYS.projects && Array.isArray(parsed) && (parsed.some((p: any) => p.id === 'project-1792807297895') || parsed.length < 26)) {
+        return fallback;
+      }
       return parsed as T;
     }
   } catch {
