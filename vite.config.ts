@@ -7,8 +7,10 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-function generateTsCode(profile: any, projects: any, techStack: any, experience: any): string {
-  return `import type { ProfileData, Project, TechItem, ExperienceItem } from '../types/portfolio';
+function generateTsCode(profile: any, projects: any, techStack: any, experience: any, selectedTemplate: string = 'ocean'): string {
+  return `import type { ProfileData, Project, TechItem, ExperienceItem, TemplateId } from '../types/portfolio';
+
+export const selectedTemplate: TemplateId = ${JSON.stringify(selectedTemplate)};
 
 export const profileData: ProfileData = ${JSON.stringify(profile, null, 2)};
 
@@ -30,9 +32,9 @@ function adminApiPlugin(): Plugin {
           req.on('data', chunk => { body += chunk; });
           req.on('end', () => {
             try {
-              const { profile, projects, techStack, experience } = JSON.parse(body);
+              const { profile, projects, techStack, experience, selectedTemplate } = JSON.parse(body);
               const targetPath = path.resolve(__dirname, 'src/data/portfolioData.ts');
-              const tsCode = generateTsCode(profile, projects, techStack, experience);
+              const tsCode = generateTsCode(profile, projects, techStack, experience, selectedTemplate || 'ocean');
               fs.writeFileSync(targetPath, tsCode, 'utf-8');
 
               // Also update index.html title if profile.name is provided

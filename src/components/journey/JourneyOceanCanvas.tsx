@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { createResizeFilter, isLowPowerDevice, onDebouncedResize } from '../../hooks/canvasPerf';
 
 export const JourneyOceanCanvas: React.FC = () => {
   const { isSunset } = useTheme();
@@ -26,7 +27,7 @@ export const JourneyOceanCanvas: React.FC = () => {
     const bubbles: { x: number; y: number; radius: number; speed: number; wobbleSpeed: number; seed: number }[] = [];
     const initBubbles = (width: number, height: number) => {
       bubbles.length = 0;
-      const count = Math.floor(width / 60);
+      const count = Math.floor(width / (isLowPowerDevice() ? 110 : 60));
       for (let i = 0; i < count; i++) {
         bubbles.push({
           x: Math.random() * width,
@@ -39,16 +40,17 @@ export const JourneyOceanCanvas: React.FC = () => {
       }
     };
 
+    const shouldResize = createResizeFilter();
     const handleResize = () => {
       const parent = canvas.parentElement;
-      if (!parent) return;
+      if (!parent || !shouldResize(parent.clientWidth, parent.clientHeight)) return;
       canvas.width = parent.clientWidth;
       canvas.height = parent.clientHeight;
       initBubbles(canvas.width, canvas.height);
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
+    const stopResize = onDebouncedResize(handleResize);
 
     const render = () => {
       if (!isRunning || !ctx || !canvas || !isVisible) return;
@@ -251,7 +253,7 @@ export const JourneyOceanCanvas: React.FC = () => {
     return () => {
       isRunning = false;
       if (animId) cancelAnimationFrame(animId);
-      window.removeEventListener('resize', handleResize);
+      stopResize();
       observer.disconnect();
     };
   }, []);

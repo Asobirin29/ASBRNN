@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { createResizeFilter, getCanvasDpr, isLowPowerDevice, onDebouncedResize } from '../../hooks/canvasPerf';
 
 export interface OceanHeroHandle {
   triggerSplash: (x: number, y: number, intensity?: number) => void;
@@ -75,7 +76,7 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, OceanHeroCanvasProps>
         speed: 2.2 * Math.max(0.6, intensity)
       });
 
-      const count = Math.floor(32 * Math.min(2.5, intensity));
+      const count = Math.floor((isLowPowerDevice() ? 14 : 32) * Math.min(2.5, intensity));
       for (let i = 0; i < count; i++) {
         const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.6;
         const speed = (3.2 + Math.random() * 6.5) * Math.min(2, intensity);
@@ -125,18 +126,27 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, OceanHeroCanvasProps>
       let isRunning = true;
 
       let isVisible = true;
+      // CSS size, cached so the render loop never forces a layout read
+      let width = 0;
+      let height = 0;
+      const shouldResize = createResizeFilter();
+      const shimmerStep = isLowPowerDevice() ? 14 : 8;
 
       const handleResize = () => {
         if (!canvas) return;
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
+        if (!shouldResize(rect.width, rect.height)) return;
+        const dpr = getCanvasDpr();
+        width = rect.width;
+        height = rect.height;
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        // setTransform (not scale) so repeated resizes never compound
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       };
 
       handleResize();
-      window.addEventListener('resize', handleResize);
+      const stopResize = onDebouncedResize(handleResize);
 
       const observer = new IntersectionObserver(
         ([entry]) => {
@@ -160,9 +170,6 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, OceanHeroCanvasProps>
 
       const render = () => {
         if (!isRunning || !canvas || !isVisible) return;
-        const rect = canvas.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
 
         ctx.clearRect(0, 0, width, height);
         timeRef.current += 0.014;
@@ -216,7 +223,7 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, OceanHeroCanvasProps>
 
           // Golden Sunbeam Shimmer / Specular reflection path across water surface
           ctx.save();
-          for (let y = sunY + sunRadius * 0.65; y < shoreBaseY; y += 8) {
+          for (let y = sunY + sunRadius * 0.65; y < shoreBaseY; y += shimmerStep) {
             const progress = (y - (sunY + sunRadius * 0.65)) / (shoreBaseY - (sunY + sunRadius * 0.65));
             const beamWidth = sunRadius * (1.1 + progress * 4.0);
             const waveShift = Math.sin(y * 0.045 + t * 2.2) * (12 * progress);
@@ -391,7 +398,7 @@ export const OceanHeroCanvas = forwardRef<OceanHeroHandle, OceanHeroCanvasProps>
       return () => {
         isRunning = false;
         if (animRef.current) cancelAnimationFrame(animRef.current);
-        window.removeEventListener('resize', handleResize);
+        stopResize();
         observer.disconnect();
       };
     }, []);

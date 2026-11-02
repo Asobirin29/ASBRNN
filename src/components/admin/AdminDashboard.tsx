@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { TemplateManager } from './TemplateManager';
 import type { ProfileData, Project, TechItem, ExperienceItem } from '../../types/portfolio';
 import {
   ArrowLeft, Save, RotateCcw, User, FolderOpen, Cpu, Briefcase,
   Plus, Trash2, ChevronDown, ChevronUp, X, Eye, LogOut,
   Upload, Download, Copy, Database, Search,
   Layers, HardDrive, CheckCircle2, AlertCircle, Sparkles, Image as ImageIcon,
-  Star, ChevronLeft, ChevronRight, Images, UploadCloud
+  Star, ChevronLeft, ChevronRight, Images, UploadCloud, Palette
 } from 'lucide-react';
 
 /* ───────── Toast Notification ───────── */
@@ -45,13 +46,14 @@ const btnSuccess = 'inline-flex items-center justify-center gap-2 px-4 py-2.5 ro
 const btnDanger = 'inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm font-medium transition-all border border-red-500/30 cursor-pointer';
 const btnGhost = 'inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl hover:bg-[#334155] text-[#94a3b8] hover:text-white text-sm font-medium transition-all cursor-pointer';
 
-type AdminTab = 'profile' | 'projects' | 'techStack' | 'experience' | 'backup';
+type AdminTab = 'profile' | 'projects' | 'techStack' | 'experience' | 'templates' | 'backup';
 
 const tabs: { id: AdminTab; label: string; icon: React.ReactNode; badgeKey?: 'projects' | 'tech' | 'exp' }[] = [
   { id: 'profile', label: 'Profil & Kontak', icon: <User className="w-4 h-4" /> },
   { id: 'projects', label: 'Projects', icon: <FolderOpen className="w-4 h-4" />, badgeKey: 'projects' },
   { id: 'techStack', label: 'Tech Stack', icon: <Cpu className="w-4 h-4" />, badgeKey: 'tech' },
   { id: 'experience', label: 'Experience', icon: <Briefcase className="w-4 h-4" />, badgeKey: 'exp' },
+  { id: 'templates', label: 'Template Desain', icon: <Palette className="w-4 h-4" /> },
   { id: 'backup', label: 'Simpan & Backup', icon: <HardDrive className="w-4 h-4" /> },
 ];
 
@@ -1453,7 +1455,7 @@ const BackupAndSyncTab: React.FC<{
    ══════════════════════════════════════════════ */
 export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const {
-    profile, projects, techStack, experience,
+    selectedTemplate, profile, projects, techStack, experience,
     setProfile, setProjects, setTechStack, setExperience,
     resetAll, importAllData, exportAllDataJson, generateTypeScriptCode,
     savePermanentToCode, uploadImage
@@ -1675,6 +1677,10 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                   <span>Experience:</span>
                   <span className="text-white font-semibold">{draftExperience.length}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span>Template:</span>
+                  <span className="text-sky-400 font-semibold capitalize">{selectedTemplate}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1729,6 +1735,15 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
                 show('Experience berhasil disimpan!');
               }}
               showToast={show}
+            />
+          )}
+
+          {activeTab === 'templates' && (
+            <TemplateManager
+              onBackToSite={onBack}
+              showToast={show}
+              onSavePermanent={handleSavePermanent}
+              isSavingPermanent={isSavingPermanent}
             />
           )}
 

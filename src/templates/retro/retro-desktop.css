@@ -1,0 +1,262 @@
+/* ============================================================
+   RETRO DESKTOP BEHAVIOUR
+   Stepped (chunky) motion only: everything moves the way a
+   486 would redraw it, never with smooth easing.
+   ============================================================ */
+
+/* ---------- Windows ---------- */
+.rw-window {
+  position: relative;
+}
+.rw-window.is-focused {
+  z-index: 20;
+}
+.rw-titlebar {
+  touch-action: pan-y;
+}
+.rw-window.is-draggable .rw-titlebar {
+  cursor: default;
+}
+.rw-window:not(.is-focused) .rw-titlebar {
+  background-color: #808080 !important;
+  color: #d4d4d4;
+}
+.rw-window.is-max {
+  position: fixed !important;
+  inset: 8px 8px 46px 8px;
+  z-index: 60;
+  overflow: auto;
+  transform: none !important;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Window opens: a chunky clip from the centre outward.
+   Hidden with visibility (not clip-path) so IntersectionObserver still sees it. */
+.rw-ready [data-win]:not(.rw-in) {
+  visibility: hidden;
+}
+.rw-ready [data-win].rw-in {
+  animation: rwOpen 0.24s steps(5, end) both;
+}
+@keyframes rwOpen {
+  from { clip-path: inset(50% 50% 50% 50%); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.rw-ready [data-win].rw-in.is-max,
+.rw-ready [data-win].rw-done {
+  clip-path: none;
+  animation: none;
+}
+
+/* Minimised window leaves a desktop shortcut in its grid slot */
+.rw-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96px;
+  border: 1px dotted rgba(255, 255, 255, 0.5);
+  background: transparent;
+  cursor: pointer;
+}
+.rw-slot__icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-shadow: 1px 1px 0 #000;
+}
+.rw-slot:focus-visible .rw-slot__label,
+.rw-slot:hover .rw-slot__label {
+  background: #000080;
+  outline: 1px dotted #ffff00;
+}
+
+/* Zoom rectangle (minimise / restore) and drag outline */
+.rw-zoom-rect,
+.rw-drag-outline {
+  position: fixed;
+  z-index: 300;
+  pointer-events: none;
+  border: 3px solid #000;
+  outline: 1px solid #fff;
+  mix-blend-mode: difference;
+}
+.rw-drag-outline {
+  border-style: dotted;
+  border-width: 3px;
+  border-color: #fff;
+  outline: none;
+}
+
+/* Start menu slides up in four redraw steps */
+.rw-start-menu {
+  animation: rwMenuUp 0.16s steps(4, end) both;
+}
+@keyframes rwMenuUp {
+  from { clip-path: inset(100% 0 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* ---------- Boot sequence ---------- */
+.rw-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: #000;
+  color: #c0c0c0;
+  cursor: wait;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+.rw-boot__bios {
+  padding: 24px clamp(16px, 4vw, 48px);
+  font-size: clamp(12px, 1.6vw, 15px);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.rw-boot__energy {
+  position: absolute;
+  top: 24px;
+  right: clamp(16px, 4vw, 48px);
+  border: 2px solid #3a7bd5;
+  color: #3a7bd5;
+  padding: 4px 10px;
+  font-weight: 700;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.2;
+}
+.rw-boot__cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  vertical-align: -0.1em;
+  background: #c0c0c0;
+  animation: rwBlink 0.5s steps(1) infinite;
+}
+@keyframes rwBlink {
+  50% { opacity: 0; }
+}
+
+.rw-splash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: linear-gradient(180deg, #000 0%, #001a40 55%, #003a7a 100%);
+  color: #fff;
+}
+.rw-splash__flag {
+  display: grid;
+  grid-template-columns: repeat(2, 38px);
+  gap: 5px;
+  transform: perspective(240px) rotateY(-18deg) skewY(-6deg);
+  animation: rwFlag 1.2s steps(6) infinite alternate;
+}
+.rw-splash__flag span {
+  height: 34px;
+}
+@keyframes rwFlag {
+  from { transform: perspective(240px) rotateY(-18deg) skewY(-6deg); }
+  to { transform: perspective(240px) rotateY(-4deg) skewY(-2deg); }
+}
+.rw-splash__title {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 900;
+  font-size: clamp(30px, 6vw, 54px);
+  letter-spacing: -0.02em;
+}
+.rw-splash__title sup {
+  font-size: 0.45em;
+  color: #ffff00;
+}
+.rw-splash__sub {
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #9ec5ff;
+}
+.rw-splash__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 14px;
+  background: repeating-linear-gradient(90deg, #003a7a 0 40px, #6aa5ff 40px 80px, #ffffff 80px 100px, #003a7a 100px 160px);
+  background-size: 320px 100%;
+  animation: rwBar 0.9s steps(8) infinite;
+}
+@keyframes rwBar {
+  to { background-position: 320px 0; }
+}
+.rw-boot__skip {
+  position: absolute;
+  bottom: 24px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: #808080;
+}
+
+/* ---------- Shutdown screen ---------- */
+.rw-shutdown-dim {
+  position: fixed;
+  inset: 0;
+  z-index: 380;
+  background-image: repeating-conic-gradient(rgba(0, 0, 0, 0.55) 0 25%, transparent 0 50%);
+  background-size: 2px 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.rw-safe {
+  position: fixed;
+  inset: 0;
+  z-index: 410;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  cursor: pointer;
+  text-align: center;
+  padding: 24px;
+}
+.rw-safe__msg {
+  color: #ff8c00;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: clamp(18px, 3.4vw, 34px);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* ---------- Screensaver ---------- */
+.rw-screensaver {
+  position: fixed;
+  inset: 0;
+  z-index: 390;
+  background: #000;
+  cursor: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rw-ready [data-win]:not(.rw-in) {
+    visibility: visible;
+  }
+  .rw-ready [data-win].rw-in,
+  .rw-start-menu,
+  .rw-splash__flag,
+  .rw-splash__bar {
+    animation: none;
+  }
+}

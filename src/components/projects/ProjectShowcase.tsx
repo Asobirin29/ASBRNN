@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, AnimatePresence, type MotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Project, ProjectCategory } from '../../types/portfolio';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
@@ -14,6 +14,157 @@ interface ProjectShowcaseProps {
   onOpenProject?: (project: Project) => void;
 }
 
+interface SlideTabButtonProps {
+  index: number;
+  totalSlides: number;
+  isCurrent: boolean;
+  label: string;
+  title: string;
+  isSunset: boolean;
+  smoothProgress: MotionValue<number>;
+  onClick: () => void;
+}
+
+const SlideTabButton: React.FC<SlideTabButtonProps> = ({
+  index,
+  totalSlides,
+  isCurrent,
+  label,
+  title,
+  isSunset,
+  smoothProgress,
+  onClick
+}) => {
+  const step = 1 / totalSlides;
+  const start = index * step;
+  const end = (index + 1) * step;
+  const scaleX = useTransform(smoothProgress, [start, end], [0, 1], { clamp: true });
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`group/btn relative px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl border text-[10px] sm:text-xs font-mono font-black transition-all cursor-pointer flex items-center gap-1 overflow-hidden ${
+        isCurrent
+          ? isSunset
+            ? 'bg-[#ea580c] text-white border-orange-400 shadow-[1.5px_1.5px_0px_#f97316] -translate-y-0.5'
+            : 'bg-[#fde047] text-[#0f172a] border-[#0f172a] shadow-[1.5px_1.5px_0px_#0f172a] -translate-y-0.5'
+          : isSunset
+          ? 'bg-[#190f26] hover:bg-[#2e1544] text-amber-200 border-orange-500/30'
+          : 'bg-[#fff9d4] hover:bg-[#faeed1] text-[#0f172a] border-[#0f172a]/40'
+      }`}
+      title={`Lompat ke: ${title}`}
+    >
+      {/* Smooth fill overlay on active slide tab */}
+      <motion.div
+        className={`absolute inset-0 pointer-events-none opacity-20 ${
+          isSunset ? 'bg-white' : 'bg-[#0284c7]'
+        }`}
+        style={{ scaleX, originX: 0 }}
+        transition={{ ease: 'easeOut' }}
+      />
+
+      <span className="relative z-10">{label}</span>
+      {isCurrent && (
+        <span className="relative z-10 hidden md:inline max-w-[70px] lg:max-w-[100px] truncate text-[9px] font-bold">
+          {title}
+        </span>
+      )}
+    </button>
+  );
+};
+
+interface DynamicFlagshipSlideProps {
+  project: Project;
+  index: number;
+  totalSlides: number;
+  smoothProgress: MotionValue<number>;
+  onSelectProject: (project: Project) => void;
+}
+
+const DynamicFlagshipSlide: React.FC<DynamicFlagshipSlideProps> = ({
+  project,
+  index,
+  totalSlides,
+  smoothProgress,
+  onSelectProject
+}) => {
+  const segment = 1 / totalSlides;
+  const wipeDuration = segment * 0.5;
+  const wipeCenter = index * segment;
+  const wipeStart = Math.max(0, wipeCenter - wipeDuration / 2);
+  const wipeEnd = Math.min(1, wipeCenter + wipeDuration / 2);
+
+  const y = useTransform(
+    smoothProgress,
+    index === 0 ? [0, 1] : [wipeStart, wipeEnd],
+    index === 0 ? ['0%', '0%'] : ['100%', '0%'],
+    { clamp: true }
+  );
+
+  return (
+    <FlagshipSlideCard
+      project={project}
+      index={index}
+      yMotion={y}
+      depthLevel={(((index) % 3) + 1) as 1 | 2 | 3}
+      onSelectProject={onSelectProject}
+    />
+  );
+};
+
+interface DynamicDockSlideProps {
+  index: number;
+  totalSlides: number;
+  smoothProgress: MotionValue<number>;
+  projects: Project[];
+  selectedCategory: ProjectCategory;
+  onSelectCategory: (category: ProjectCategory) => void;
+  onSelectProject: (project: Project) => void;
+  isSunset: boolean;
+}
+
+const DynamicDockSlide: React.FC<DynamicDockSlideProps> = ({
+  index,
+  totalSlides,
+  smoothProgress,
+  projects,
+  selectedCategory,
+  onSelectCategory,
+  onSelectProject,
+  isSunset
+}) => {
+  const segment = 1 / totalSlides;
+  const wipeDuration = segment * 0.5;
+  const wipeCenter = index * segment;
+  const wipeStart = Math.max(0, wipeCenter - wipeDuration / 2);
+  const wipeEnd = Math.min(1, wipeCenter + wipeDuration / 2);
+
+  const y = useTransform(
+    smoothProgress,
+    [wipeStart, wipeEnd],
+    ['100%', '0%'],
+    { clamp: true }
+  );
+
+  return (
+    <motion.div
+      style={{ y, zIndex: (index + 1) * 10 }}
+      className={`absolute inset-0 w-full h-full shadow-[0_-8px_24px_rgba(15,23,42,0.35)] ${
+        isSunset ? 'bg-[#1a0824]' : 'bg-[#02587a]'
+      }`}
+    >
+      <FilteredProjectDock
+        projects={projects}
+        selectedCategory={selectedCategory}
+        onSelectCategory={onSelectCategory}
+        onSelectProject={onSelectProject}
+        slideNumber={index + 1}
+      />
+    </motion.div>
+  );
+};
+
 export const ProjectShowcase: React.FC<ProjectShowcaseProps> = ({ onOpenProject }) => {
   const { isSunset } = useTheme();
   const { projects: projectsData } = usePortfolioData();
@@ -27,16 +178,18 @@ export const ProjectShowcase: React.FC<ProjectShowcaseProps> = ({ onOpenProject 
   const handleSelect = onOpenProject || setLocalActiveProject;
   const activeProject = onOpenProject ? null : localActiveProject;
 
-  // featured flagship projects
-  const flagshipProjects = projectsData.filter((p) => p.featured);
+  // Featured flagship projects; fallback to all projects if none marked featured
+  const featured = projectsData.filter((p) => p.featured);
+  const flagshipProjects = featured.length > 0 ? featured : projectsData.slice(0, 3);
+  const totalSlides = Math.max(1, flagshipProjects.length + 1);
 
-  // pinning scroll progress
+  // Pinning scroll progress
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end']
   });
 
-  // smooth inertial spring for tactile deceleration
+  // Smooth inertial spring for tactile deceleration
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 55,
     damping: 20,
@@ -44,41 +197,23 @@ export const ProjectShowcase: React.FC<ProjectShowcaseProps> = ({ onOpenProject 
     restDelta: 0.0005
   });
 
-  // gradual curtain wipe ranges
-  const ySlide2 = useTransform(smoothProgress, [0.22, 0.36], ['100%', '0%'], { clamp: true });
-  const ySlide3 = useTransform(smoothProgress, [0.47, 0.61], ['100%', '0%'], { clamp: true });
-  const ySlide4 = useTransform(smoothProgress, [0.72, 0.86], ['100%', '0%'], { clamp: true });
-
-  // graceful dimming of covered slides to prevent visual clashes
-  const opacitySlide1 = useTransform(smoothProgress, [0.22, 0.36], [1, 0.2]);
-  const opacitySlide2 = useTransform(smoothProgress, [0.47, 0.61], [1, 0.2]);
-  const opacitySlide3 = useTransform(smoothProgress, [0.72, 0.86], [1, 0.2]);
-
-  // progress bar scales for indicator tabs
-  const scaleX0 = useTransform(smoothProgress, [0, 0.25], [0, 1], { clamp: true });
-  const scaleX1 = useTransform(smoothProgress, [0.25, 0.5], [0, 1], { clamp: true });
-  const scaleX2 = useTransform(smoothProgress, [0.5, 0.75], [0, 1], { clamp: true });
-  const scaleX3 = useTransform(smoothProgress, [0.75, 1.0], [0, 1], { clamp: true });
-  const progressScales = [scaleX0, scaleX1, scaleX2, scaleX3];
-
   // Track active slide index accurately from scroll progress
   useEffect(() => {
-    if (viewMode !== 'showcase') return;
+    if (viewMode !== 'showcase' || totalSlides <= 1) return;
 
     const unsubscribe = scrollYProgress.on('change', (latest) => {
-      if (latest < 0.22) {
-        setActiveSlideIndex(0);
-      } else if (latest < 0.47) {
-        setActiveSlideIndex(1);
-      } else if (latest < 0.72) {
-        setActiveSlideIndex(2);
-      } else {
-        setActiveSlideIndex(3);
+      let idx = 0;
+      for (let i = 1; i < totalSlides; i++) {
+        const center = i / totalSlides;
+        if (latest >= center) {
+          idx = i;
+        }
       }
+      setActiveSlideIndex(idx);
     });
 
     return () => unsubscribe();
-  }, [scrollYProgress, viewMode]);
+  }, [scrollYProgress, viewMode, totalSlides]);
 
   // Programmatic jump to target slide without manual scrolling
   const jumpToSlide = (targetIndex: number) => {
@@ -87,11 +222,20 @@ export const ProjectShowcase: React.FC<ProjectShowcaseProps> = ({ onOpenProject 
     const startY = window.scrollY + container.getBoundingClientRect().top;
     const totalScroll = container.scrollHeight - window.innerHeight;
 
-    // Progress target points for each slide
-    const progressTargets = [0.02, 0.36, 0.61, 0.95];
-    const targetProgress = progressTargets[targetIndex] ?? 0;
-    const targetY = startY + totalScroll * targetProgress;
+    let targetProgress = 0.02;
+    if (targetIndex <= 0) {
+      targetProgress = 0.02;
+    } else if (targetIndex >= totalSlides - 1) {
+      targetProgress = 0.98;
+    } else {
+      const segment = 1 / totalSlides;
+      const wipeDuration = segment * 0.5;
+      const wipeEnd = targetIndex * segment + wipeDuration / 2;
+      const nextWipeStart = (targetIndex + 1) * segment - wipeDuration / 2;
+      targetProgress = (wipeEnd + nextWipeStart) / 2;
+    }
 
+    const targetY = startY + totalScroll * targetProgress;
     scrollToLenis(targetY, { duration: 0.9 });
   };
 
@@ -101,7 +245,7 @@ export const ProjectShowcase: React.FC<ProjectShowcaseProps> = ({ onOpenProject 
   };
 
   const handleNextSlide = () => {
-    const nextIdx = Math.min(3, activeSlideIndex + 1);
+    const nextIdx = Math.min(totalSlides - 1, activeSlideIndex + 1);
     jumpToSlide(nextIdx);
   };
 
@@ -116,12 +260,29 @@ export const ProjectShowcase: React.FC<ProjectShowcaseProps> = ({ onOpenProject 
     }, 60);
   };
 
+  // Build slide tabs: one for each flagship project + 1 for Indeks Proyek
+  const slideTabs = [
+    ...flagshipProjects.map((p, idx) => ({
+      label: (idx + 1).toString().padStart(2, '0'),
+      title: p.title
+    })),
+    {
+      label: '📁',
+      title: 'Indeks'
+    }
+  ];
+
   return (
     <section
       id="projects"
       ref={containerRef}
+      style={
+        viewMode === 'showcase'
+          ? { height: `${Math.max(2, totalSlides + 0.6) * 125}vh` }
+          : undefined
+      }
       className={`relative scroll-mt-20 ${
-        viewMode === 'showcase' ? 'h-[560vh]' : 'min-h-screen py-6 sm:py-10'
+        viewMode === 'showcase' ? '' : 'min-h-screen py-6 sm:py-10'
       } select-none transition-colors duration-500 ${
         isSunset ? 'bg-[#190f26]' : 'bg-[#fff9d4]'
       }`}
@@ -218,60 +379,29 @@ export const ProjectShowcase: React.FC<ProjectShowcaseProps> = ({ onOpenProject 
                     <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
 
-                  {/* Slide Tabs: 01, 02, 03, 📁 */}
-                  {[0, 1, 2, 3].map((idx) => {
-                    const isCurrent = activeSlideIndex === idx;
-                    const slideTitles = [
-                      flagshipProjects[0]?.title || '01',
-                      flagshipProjects[1]?.title || '02',
-                      flagshipProjects[2]?.title || '03',
-                      'Indeks Proyek'
-                    ];
-                    const shortLabels = ['01', '02', '03', '📁'];
-
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => jumpToSlide(idx)}
-                        className={`group/btn relative px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl border text-[10px] sm:text-xs font-mono font-black transition-all cursor-pointer flex items-center gap-1 overflow-hidden ${
-                          isCurrent
-                            ? isSunset
-                              ? 'bg-[#ea580c] text-white border-orange-400 shadow-[1.5px_1.5px_0px_#f97316] -translate-y-0.5'
-                              : 'bg-[#fde047] text-[#0f172a] border-[#0f172a] shadow-[1.5px_1.5px_0px_#0f172a] -translate-y-0.5'
-                            : isSunset
-                            ? 'bg-[#190f26] hover:bg-[#2e1544] text-amber-200 border-orange-500/30'
-                            : 'bg-[#fff9d4] hover:bg-[#faeed1] text-[#0f172a] border-[#0f172a]/40'
-                        }`}
-                        title={`Lompat ke: ${slideTitles[idx]}`}
-                      >
-                        {/* Smooth fill overlay on active slide tab */}
-                        <motion.div
-                          className={`absolute inset-0 pointer-events-none opacity-20 ${
-                            isSunset ? 'bg-white' : 'bg-[#0284c7]'
-                          }`}
-                          style={{ scaleX: progressScales[idx], originX: 0 }}
-                          transition={{ ease: 'easeOut' }}
-                        />
-
-                        <span className="relative z-10">{shortLabels[idx]}</span>
-                        {isCurrent && (
-                          <span className="relative z-10 hidden md:inline max-w-[70px] lg:max-w-[100px] truncate text-[9px] font-bold">
-                            {idx === 3 ? 'Indeks' : slideTitles[idx]}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+                  {/* Slide Tabs */}
+                  {slideTabs.map((tab, idx) => (
+                    <SlideTabButton
+                      key={idx}
+                      index={idx}
+                      totalSlides={totalSlides}
+                      isCurrent={activeSlideIndex === idx}
+                      label={tab.label}
+                      title={tab.title}
+                      isSunset={isSunset}
+                      smoothProgress={smoothProgress}
+                      onClick={() => jumpToSlide(idx)}
+                    />
+                  ))}
 
                   {/* Next Slide Button */}
                   <button
                     type="button"
                     onClick={handleNextSlide}
-                    disabled={activeSlideIndex === 3}
+                    disabled={activeSlideIndex >= totalSlides - 1}
                     aria-label="Proyek Berikutnya"
                     className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
-                      activeSlideIndex === 3
+                      activeSlideIndex >= totalSlides - 1
                         ? 'opacity-30 cursor-not-allowed border-transparent'
                         : isSunset
                         ? 'bg-[#351648] hover:bg-[#481c64] text-amber-300 border-orange-500/40 active:translate-y-0.5'
@@ -285,59 +415,34 @@ export const ProjectShowcase: React.FC<ProjectShowcaseProps> = ({ onOpenProject 
               </div>
             </div>
 
-            {/* flagship slide presentation */}
-            {flagshipProjects[0] && (
-              <FlagshipSlideCard
-                project={flagshipProjects[0]}
-                index={0}
-                yMotion="0%"
-                opacityMotion={opacitySlide1}
-                depthLevel={1}
+            {/* Dynamic Flagship Slide Presentation */}
+            {flagshipProjects.map((p, idx) => (
+              <DynamicFlagshipSlide
+                key={p.id || idx}
+                project={p}
+                index={idx}
+                totalSlides={totalSlides}
+                smoothProgress={smoothProgress}
                 onSelectProject={handleSelect}
               />
-            )}
+            ))}
 
-            {flagshipProjects[1] && (
-              <FlagshipSlideCard
-                project={flagshipProjects[1]}
-                index={1}
-                yMotion={ySlide2}
-                opacityMotion={opacitySlide2}
-                depthLevel={2}
-                onSelectProject={handleSelect}
-              />
-            )}
-
-            {flagshipProjects[2] && (
-              <FlagshipSlideCard
-                project={flagshipProjects[2]}
-                index={2}
-                yMotion={ySlide3}
-                opacityMotion={opacitySlide3}
-                depthLevel={3}
-                onSelectProject={handleSelect}
-              />
-            )}
-
-            {/* project index overview */}
-            <motion.div
-              style={{ y: ySlide4, zIndex: 40 }}
-              className={`absolute inset-0 w-full h-full shadow-[0_-8px_24px_rgba(15,23,42,0.35)] ${
-                isSunset ? 'bg-[#1a0824]' : 'bg-[#02587a]'
-              }`}
-            >
-              <FilteredProjectDock
-                projects={projectsData}
-                selectedCategory={selectedCategory}
-                onSelectCategory={setSelectedCategory}
-                onSelectProject={handleSelect}
-              />
-            </motion.div>
+            {/* Project Index Overview (Final Slide) */}
+            <DynamicDockSlide
+              index={flagshipProjects.length}
+              totalSlides={totalSlides}
+              smoothProgress={smoothProgress}
+              projects={projectsData}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+              onSelectProject={handleSelect}
+              isSunset={isSunset}
+            />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* local fallback case study modal */}
+      {/* Local fallback case study modal */}
       {!onOpenProject && activeProject && (
         <ProjectCaseStudyModal
           project={activeProject}

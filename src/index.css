@@ -15,6 +15,101 @@
     --accent-water: #38bdf8;
     --accent-sand: #d4b27d;
     --accent-sand-hover: #c49e62;
+
+    /* Terminal Design System Authoritative Tokens */
+    --dp-color-ground: #000000;
+    --dp-color-ink: #66ff66;
+    --dp-color-ink-muted: #58ca58;
+    --dp-color-rule: #255325;
+    --dp-color-emphasis: #ffffff;
+    --dp-typography-face: "TerminalPlex", "IBM Plex Mono", monospace;
+    --dp-typography-body: 18px;
+    --dp-typography-label: 16px;
+    --dp-typography-heading: 24px;
+    --dp-typography-display: 40px;
+    --dp-typography-display-narrow: 32px;
+    --dp-typography-body-leading: 1.5;
+    --dp-typography-display-leading: 1.2;
+    --dp-typography-display-leading-narrow: 1.25;
+    --dp-typography-list-leading: 27px;
+    --dp-spacing-cell: 1ch;
+    --dp-spacing-gutter: 2ch;
+    --dp-spacing-column-gap: 3ch;
+    --dp-spacing-column-gap-wide: 4ch;
+    --dp-spacing-inset: 9px;
+    --dp-spacing-row-compact: 18px;
+    --dp-spacing-row: 27px;
+    --dp-spacing-section-compact: 36px;
+    --dp-spacing-section: 54px;
+    --dp-radius-control: 0;
+    --dp-border-hairline: 1px;
+    --dp-motion-cursor: 1.2s;
+
+    /* Bauhaus Design System Authoritative Tokens */
+    --bauhaus-color-ground: #f5f4ee;
+    --bauhaus-color-ink: #000000;
+    --bauhaus-color-accent: #ff0000;
+    --bauhaus-color-field: #0000ff;
+    --bauhaus-color-field-support: #ffff00;
+    --bauhaus-color-quiet: #e8e8e8;
+    --bauhaus-color-on-field: #ffffff;
+    --bauhaus-typography-face: "Bauhaus Host", "Host Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --bauhaus-typography-body: 18px;
+    --bauhaus-typography-reading: 17px;
+    --bauhaus-typography-label: 15px;
+    --bauhaus-typography-caption: 14px;
+    --bauhaus-typography-weight-display: 800;
+    --bauhaus-typography-weight-action: 750;
+    --bauhaus-typography-weight-label: 650;
+    --bauhaus-typography-weight-reading: 450;
+    --bauhaus-typography-reading-leading: 1.5;
+    --bauhaus-spacing-gutter: clamp(22px, 4.45cqi, 72px);
+    --bauhaus-radius-square: 0;
+    --bauhaus-radius-circle: 50%;
+    --bauhaus-border-rule: 4px;
+    --bauhaus-border-rule-compact: 3px;
+    --bauhaus-motion-interaction: 0s;
+  }
+
+  @font-face {
+    font-family: 'Bauhaus Host';
+    src: local('Host Grotesk');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'TerminalPlex';
+    src: local('IBM Plex Mono');
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @keyframes terminalBlink {
+    0%, 49% {
+      opacity: 1;
+    }
+    50%, 100% {
+      opacity: 0;
+    }
+  }
+
+  .terminal-cursor {
+    display: inline-block;
+    width: 1ch;
+    height: 1.15em;
+    vertical-align: -0.15em;
+    background-color: var(--dp-color-ink, #66ff66);
+    animation: terminalBlink var(--dp-motion-cursor, 1.2s) steps(1) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-cursor {
+      animation: none;
+      opacity: 1;
+    }
   }
 
   [data-theme="sunset"] {
@@ -151,4 +246,249 @@
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'%3E%3Cpath d='M0,17 C30,10 60,24 90,17 C105,13 115,21 120,17 L120,40 L0,40 Z' fill='%23fbbf24'/%3E%3Cpath d='M0,20 C30,14 60,26 90,20 C105,17 115,23 120,20 L120,40 L0,40 Z' fill='%23ea580c'/%3E%3C/svg%3E"),
     linear-gradient(180deg, #ffffff 0%, #ffffff 49%, #ea580c 50%, #7c2d12 100%);
+}
+
+/* ============================================================
+   RETRO DESIGN SYSTEM AUTHORITATIVE TOKENS & UTILITIES
+   ============================================================ */
+:root {
+  --dp-color-window: #d4d4d4;
+  --dp-color-ink: #000000;
+  --dp-color-bevel-dark: #808080;
+  --dp-color-bevel-light: #ffffff;
+  --dp-color-accent: #6600ff;
+  --dp-color-highlight: #ffff00;
+  --dp-color-link-hover: #0000ff;
+  --dp-color-desktop: #008080;
+  --dp-color-emphasis: #ff00b8;
+  --dp-color-titlebar: #000080;
+  --dp-typography-interface: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --dp-typography-display: "Host Grotesk", "Plus Jakarta Sans", sans-serif;
+  --dp-typography-mono: "IBM Plex Mono", "JetBrains Mono", monospace;
+  --dp-typography-body: 16px;
+  --dp-typography-supporting: 15px;
+  --dp-typography-label: 12px;
+  --dp-typography-body-leading: 1.4;
+  --dp-spacing-pane-inset: 5px;
+  --dp-spacing-item-gap: 10px;
+  --dp-radius-control: 0px;
+  --dp-border-frame: 2px;
+  --dp-border-rule: 1px;
+  --dp-motion-ticker-cycle: 1s;
+}
+
+@layer components {
+  .font-retro-display {
+    font-family: var(--dp-typography-display);
+  }
+
+  .font-retro-interface {
+    font-family: var(--dp-typography-interface);
+  }
+
+  .font-retro-mono {
+    font-family: var(--dp-typography-mono);
+  }
+
+  /* Classic Windows 95 / Retro Desktop Bevels */
+  .retro-bevel-raised {
+    background-color: var(--dp-color-window);
+    border-top: 2px solid var(--dp-color-bevel-light);
+    border-left: 2px solid var(--dp-color-bevel-light);
+    border-right: 2px solid var(--dp-color-bevel-dark);
+    border-bottom: 2px solid var(--dp-color-bevel-dark);
+    box-shadow: 1px 1px 0px 1px var(--dp-color-ink);
+  }
+
+  .retro-bevel-inset {
+    border-top: 2px solid var(--dp-color-bevel-dark);
+    border-left: 2px solid var(--dp-color-bevel-dark);
+    border-right: 2px solid var(--dp-color-bevel-light);
+    border-bottom: 2px solid var(--dp-color-bevel-light);
+    box-shadow: inset 1px 1px 0px 0px var(--dp-color-ink);
+  }
+
+  /* Raised Key Button */
+  .retro-key-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--dp-color-window);
+    color: var(--dp-color-ink);
+    font-family: var(--dp-typography-interface);
+    font-size: var(--dp-typography-label);
+    border-top: 2px solid var(--dp-color-bevel-light);
+    border-left: 2px solid var(--dp-color-bevel-light);
+    border-right: 2px solid var(--dp-color-bevel-dark);
+    border-bottom: 2px solid var(--dp-color-bevel-dark);
+    box-shadow: 1px 1px 0px 1px var(--dp-color-ink);
+    border-radius: 0;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+    padding: 4px 10px;
+    transition: none;
+  }
+
+  .retro-key-button:focus-visible {
+    outline: 2px dashed var(--dp-color-ink);
+    outline-offset: -3px;
+  }
+
+  .retro-key-button:active,
+  .retro-key-button.is-pressed {
+    border-top: 2px solid var(--dp-color-ink);
+    border-left: 2px solid var(--dp-color-ink);
+    border-right: 2px solid var(--dp-color-bevel-light);
+    border-bottom: 2px solid var(--dp-color-bevel-light);
+    box-shadow: inset 1px 1px 0px 0px var(--dp-color-bevel-dark);
+    transform: translate(1px, 1px);
+  }
+
+  /* Purple Pressed Key for comparisons/filter */
+  .retro-key-button-purple {
+    background-color: var(--dp-color-accent);
+    color: #ffffff;
+    border-top: 2px solid #a855f7;
+    border-left: 2px solid #a855f7;
+    border-right: 2px solid #3b0764;
+    border-bottom: 2px solid #3b0764;
+    box-shadow: 1px 1px 0px 1px var(--dp-color-ink);
+  }
+
+  .retro-key-button-purple:active,
+  .retro-key-button-purple.is-pressed {
+    background-color: #5500d4;
+    border-top: 2px solid var(--dp-color-ink);
+    border-left: 2px solid var(--dp-color-ink);
+    border-right: 2px solid #a855f7;
+    border-bottom: 2px solid #a855f7;
+    box-shadow: inset 1px 1px 0px 0px #2e1065;
+    transform: translate(1px, 1px);
+  }
+
+  /* ============================================================
+     RETRO POLAROID / PROJECT CAROUSEL (FAENDITA STYLE)
+     ============================================================ */
+  .polaroid-carousel-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .polaroid-carousel {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    min-height: 520px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .polaroid-card {
+    position: absolute;
+    width: 350px;
+    max-width: 90vw;
+    background: var(--dp-color-window);
+    border-top: 2px solid var(--dp-color-bevel-light);
+    border-left: 2px solid var(--dp-color-bevel-light);
+    border-right: 2px solid var(--dp-color-bevel-dark);
+    border-bottom: 2px solid var(--dp-color-bevel-dark);
+    box-shadow: 4px 4px 0px 0px var(--dp-color-ink);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    transition: transform 0.28s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease, z-index 0.28s ease;
+  }
+
+  .polaroid-card.active {
+    z-index: 20;
+    transform: translateX(0) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .polaroid-card.prev {
+    z-index: 10;
+    transform: translateX(-75px) scale(0.9) rotate(-2deg);
+    opacity: 0.55;
+    cursor: pointer;
+  }
+
+  .polaroid-card.next {
+    z-index: 10;
+    transform: translateX(75px) scale(0.9) rotate(2deg);
+    opacity: 0.55;
+    cursor: pointer;
+  }
+
+  .polaroid-card.prev:hover,
+  .polaroid-card.next:hover {
+    opacity: 0.85;
+  }
+
+  @media (max-width: 640px) {
+    .polaroid-card {
+      width: 295px;
+    }
+    .polaroid-card.prev {
+      transform: translateX(-35px) scale(0.88);
+    }
+    .polaroid-card.next {
+      transform: translateX(35px) scale(0.88);
+    }
+  }
+
+  .carousel-dot {
+    width: 11px;
+    height: 11px;
+    background: var(--dp-color-window);
+    border: 1px solid #000;
+    box-shadow: inset 1px 1px 0 #fff;
+    cursor: pointer;
+    transition: none;
+  }
+
+  .carousel-dot.active {
+    background: var(--dp-color-titlebar);
+    box-shadow: inset 1px 1px 0 #000;
+  }
+}
+
+/* Ocean on phones: backdrop blur over animated canvases re-blurs every frame,
+   which is the most expensive thing a mobile GPU can be asked to do here. */
+@media (pointer: coarse), (max-width: 767px) {
+  .ocean-root [class*='backdrop-blur'] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+/* Ticker step animation */
+@keyframes retroTickerStep {
+  0%, 49.9% {
+    transform: translateX(0);
+  }
+  50%, 99.9% {
+    transform: translateX(4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.retro-ticker-arrow {
+  display: inline-block;
+  animation: retroTickerStep var(--dp-motion-ticker-cycle) steps(2, start) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .retro-ticker-arrow {
+    animation: none !important;
+    transform: none !important;
+  }
 }

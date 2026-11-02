@@ -17,7 +17,6 @@ interface FlagshipSlideCardProps {
   project: Project;
   index: number;
   yMotion?: any;
-  opacityMotion?: any;
   depthLevel?: 1 | 2 | 3;
   onSelectProject: (project: Project) => void;
 }
@@ -26,16 +25,15 @@ export const FlagshipSlideCard: React.FC<FlagshipSlideCardProps> = ({
   project,
   index,
   yMotion = '0%',
-  opacityMotion = 1,
   depthLevel = (index + 1) as 1 | 2 | 3,
   onSelectProject
 }) => {
   const { isSunset } = useTheme();
-  const zIndex = index === 0 ? 10 : index === 1 ? 20 : 30;
+  const zIndex = (index + 1) * 10;
 
   return (
     <motion.div
-      style={{ y: yMotion, opacity: opacityMotion, zIndex }}
+      style={{ y: yMotion, zIndex }}
       className={`absolute inset-0 w-full h-full flex flex-col justify-between overflow-hidden select-none transition-colors duration-500 ${
         isSunset
           ? 'bg-[#2a1035] shadow-[0_-8px_24px_rgba(234,88,12,0.25)]'
@@ -65,7 +63,7 @@ export const FlagshipSlideCard: React.FC<FlagshipSlideCardProps> = ({
                     : 'bg-[#fde047] text-[#0f172a] border-[#0f172a] shadow-[2px_2px_0px_#0f172a]'
                 }`}
               >
-                0{index + 1} // {project.category === 'fullstack' ? 'FULL-STACK WEB' : 'MOBILE FLUTTER'}
+                {(index + 1).toString().padStart(2, '0')} // {project.category === 'fullstack' ? 'FULL-STACK WEB' : 'MOBILE FLUTTER'}
               </span>
 
               <span

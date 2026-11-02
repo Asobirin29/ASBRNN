@@ -18,13 +18,15 @@ interface FilteredProjectDockProps {
   selectedCategory: ProjectCategory;
   onSelectCategory: (category: ProjectCategory) => void;
   onSelectProject: (project: Project) => void;
+  slideNumber?: number;
 }
 
 export const FilteredProjectDock: React.FC<FilteredProjectDockProps> = ({
   projects,
   selectedCategory,
   onSelectCategory,
-  onSelectProject
+  onSelectProject,
+  slideNumber
 }) => {
   const { isSunset } = useTheme();
   const [activeProjectId, setActiveProjectId] = useState<string>(projects[0]?.id || 'cimart');
@@ -68,7 +70,7 @@ export const FilteredProjectDock: React.FC<FilteredProjectDockProps> = ({
                   : 'bg-[#fde047] text-[#0f172a] border-[#0f172a] shadow-[2px_2px_0px_#0f172a]'
               }`}
             >
-              04 // INDEKS PORTOFOLIO
+              {(slideNumber || 4).toString().padStart(2, '0')} // INDEKS PORTOFOLIO
             </span>
             <h3
               className={`text-lg sm:text-2xl font-black tracking-tight ${

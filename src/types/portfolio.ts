@@ -1,5 +1,19 @@
 export type ProjectCategory = 'all' | 'fullstack' | 'mobile';
 
+export type TemplateId = 'ocean' | 'modern' | 'retro' | 'cyber' | 'dreamy' | 'bento';
+
+export interface TemplateInfo {
+  id: TemplateId;
+  name: string;
+  tagline: string;
+  description: string;
+  badge: string;
+  category: 'Interactive' | 'Minimalist' | 'Bento Grid' | 'Terminal' | 'Dreamy' | 'Retro';
+  accentColor: string;
+  styleTags: string[];
+  features: string[];
+}
+
 export interface Project {
   id: string;
   title: string;

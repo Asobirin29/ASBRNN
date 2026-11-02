@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { createResizeFilter, isLowPowerDevice, onDebouncedResize } from '../../hooks/canvasPerf';
 
 interface SplashDroplet {
   x: number;
@@ -48,7 +49,7 @@ export const ContactOceanCanvas: React.FC = () => {
     const bubbles: { x: number; y: number; radius: number; speed: number; wobbleSpeed: number; seed: number }[] = [];
     const initBubbles = (width: number, height: number) => {
       bubbles.length = 0;
-      const count = Math.floor(width / 45);
+      const count = Math.floor(width / (isLowPowerDevice() ? 90 : 45));
       for (let i = 0; i < count; i++) {
         bubbles.push({
           x: Math.random() * width,
@@ -61,16 +62,17 @@ export const ContactOceanCanvas: React.FC = () => {
       }
     };
 
+    const shouldResize = createResizeFilter();
     const handleResize = () => {
       const parent = canvas.parentElement;
-      if (!parent) return;
+      if (!parent || !shouldResize(parent.clientWidth, parent.clientHeight)) return;
       canvas.width = parent.clientWidth;
       canvas.height = parent.clientHeight;
       initBubbles(canvas.width, canvas.height);
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
+    const stopResize = onDebouncedResize(handleResize);
 
     // click handler to trigger water splash
     const handleClick = (e: MouseEvent) => {
@@ -351,7 +353,7 @@ export const ContactOceanCanvas: React.FC = () => {
     return () => {
       isRunning = false;
       if (animId) cancelAnimationFrame(animId);
-      window.removeEventListener('resize', handleResize);
+      stopResize();
       if (parent) {
         parent.removeEventListener('click', handleClick);
       }

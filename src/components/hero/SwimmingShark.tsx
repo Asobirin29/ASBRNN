@@ -81,9 +81,21 @@ export const SwimmingShark: React.FC<SwimmingSharkProps> = ({
     return () => clearInterval(blinkInterval);
   }, []);
 
+  // Pause swimming while the hero is scrolled out of view
+  const [isInView, setIsInView] = useState(true);
+  useEffect(() => {
+    const el = sharkRef.current?.parentElement;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setIsInView(entry.isIntersecting), {
+      threshold: 0.02
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // Occasional breach jump (shark leaps out of the water)
   useEffect(() => {
-    if (isGrabbed) return;
+    if (isGrabbed || !isInView) return;
     const breachInterval = setInterval(() => {
       if (Math.random() > 0.45 && !isGrabbed) {
         setIsBreaching(true);
@@ -98,11 +110,11 @@ export const SwimmingShark: React.FC<SwimmingSharkProps> = ({
     }, 9000);
 
     return () => clearInterval(breachInterval);
-  }, [isGrabbed, onSharkSplash]);
+  }, [isGrabbed, isInView, onSharkSplash]);
 
   // Swimming motion loop across ocean
   useEffect(() => {
-    if (isGrabbed) return;
+    if (isGrabbed || !isInView) return;
 
     let animId: number;
     let lastTime = performance.now();
@@ -150,7 +162,7 @@ export const SwimmingShark: React.FC<SwimmingSharkProps> = ({
 
     animId = requestAnimationFrame(swimLoop);
     return () => cancelAnimationFrame(animId);
-  }, [direction, isGrabbed, isBreaching, onSharkSwim, x, y]);
+  }, [direction, isGrabbed, isInView, isBreaching, onSharkSwim, x, y]);
 
   const triggerQuip = () => {
     if (deckRef.current.length === 0) {

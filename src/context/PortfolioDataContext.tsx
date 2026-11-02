@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import type { ProfileData, Project, TechItem, ExperienceItem } from '../types/portfolio';
+import type { ProfileData, Project, TechItem, ExperienceItem, TemplateId } from '../types/portfolio';
 import {
+  selectedTemplate as defaultTemplate,
   profileData as defaultProfile,
   projectsData as defaultProjects,
   techStackData as defaultTech,
@@ -12,6 +13,7 @@ const STORAGE_KEYS = {
   projects: 'portfolio_projects',
   techStack: 'portfolio_tech',
   experience: 'portfolio_experience',
+  template: 'portfolio_template',
 } as const;
 
 function loadFromStorage<T>(key: string, fallback: T): T {
@@ -39,6 +41,8 @@ function saveToStorage<T>(key: string, data: T): void {
 }
 
 interface PortfolioDataContextValue {
+  selectedTemplate: TemplateId;
+  setSelectedTemplate: (data: TemplateId) => void;
   profile: ProfileData;
   projects: Project[];
   techStack: TechItem[];
@@ -48,7 +52,7 @@ interface PortfolioDataContextValue {
   setTechStack: (data: TechItem[]) => void;
   setExperience: (data: ExperienceItem[]) => void;
   resetAll: () => void;
-  importAllData: (data: { profile?: ProfileData; projects?: Project[]; techStack?: TechItem[]; experience?: ExperienceItem[] }) => void;
+  importAllData: (data: { selectedTemplate?: TemplateId; profile?: ProfileData; projects?: Project[]; techStack?: TechItem[]; experience?: ExperienceItem[] }) => void;
   exportAllDataJson: () => string;
   generateTypeScriptCode: () => string;
   savePermanentToCode: () => Promise<{ success: boolean; message?: string; error?: string }>;
@@ -59,6 +63,10 @@ interface PortfolioDataContextValue {
 const PortfolioDataContext = createContext<PortfolioDataContextValue | null>(null);
 
 export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [selectedTemplate, _setSelectedTemplate] = useState<TemplateId>(() => {
+    const loaded = loadFromStorage<TemplateId>(STORAGE_KEYS.template, defaultTemplate || 'ocean');
+    return loaded === 'dreamy' ? 'retro' : loaded;
+  });
   const [profile, _setProfile] = useState<ProfileData>(() =>
     loadFromStorage(STORAGE_KEYS.profile, defaultProfile)
   );
@@ -83,6 +91,12 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [profile?.name, profile?.tagline]);
 
+  const setSelectedTemplate = useCallback((tpl: TemplateId) => {
+    const finalTpl = tpl === 'dreamy' ? 'retro' : tpl;
+    _setSelectedTemplate(finalTpl);
+    saveToStorage(STORAGE_KEYS.template, finalTpl);
+  }, []);
+
   const setProfile = useCallback((data: ProfileData) => {
     _setProfile(data);
     saveToStorage(STORAGE_KEYS.profile, data);
@@ -104,6 +118,7 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const resetAll = useCallback(() => {
+    _setSelectedTemplate(defaultTemplate || 'ocean');
     _setProfile(defaultProfile);
     _setProjects(defaultProjects);
     _setTechStack(defaultTech);
@@ -112,11 +127,16 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const importAllData = useCallback((data: {
+    selectedTemplate?: TemplateId;
     profile?: ProfileData;
     projects?: Project[];
     techStack?: TechItem[];
     experience?: ExperienceItem[];
   }) => {
+    if (data.selectedTemplate) {
+      _setSelectedTemplate(data.selectedTemplate);
+      saveToStorage(STORAGE_KEYS.template, data.selectedTemplate);
+    }
     if (data.profile) {
       _setProfile(data.profile);
       saveToStorage(STORAGE_KEYS.profile, data.profile);
@@ -137,16 +157,19 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const exportAllDataJson = useCallback(() => {
     return JSON.stringify({
+      selectedTemplate,
       profile,
       projects,
       techStack,
       experience,
       exportedAt: new Date().toISOString()
     }, null, 2);
-  }, [profile, projects, techStack, experience]);
+  }, [selectedTemplate, profile, projects, techStack, experience]);
 
   const generateTypeScriptCode = useCallback(() => {
-    return `import type { ProfileData, Project, TechItem, ExperienceItem } from '../types/portfolio';
+    return `import type { ProfileData, Project, TechItem, ExperienceItem, TemplateId } from '../types/portfolio';
+
+export const selectedTemplate: TemplateId = ${JSON.stringify(selectedTemplate)};
 
 export const profileData: ProfileData = ${JSON.stringify(profile, null, 2)};
 
@@ -156,7 +179,7 @@ export const projectsData: Project[] = ${JSON.stringify(projects, null, 2)};
 
 export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, null, 2)};
 `;
-  }, [profile, projects, techStack, experience]);
+  }, [selectedTemplate, profile, projects, techStack, experience]);
 
   const savePermanentToCode = useCallback(async (): Promise<{ success: boolean; message?: string; error?: string }> => {
     const isLocal = typeof window !== 'undefined' &&
@@ -174,7 +197,7 @@ export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, nul
       const res = await fetch('/api/save-portfolio-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profile, projects, techStack, experience }),
+        body: JSON.stringify({ profile, projects, techStack, experience, selectedTemplate }),
       });
       const text = await res.text();
       try {
@@ -186,7 +209,7 @@ export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, nul
     } catch (err: any) {
       return { success: false, error: err.message || 'Gagal menyimpan ke file source code lokal' };
     }
-  }, [profile, projects, techStack, experience]);
+  }, [profile, projects, techStack, experience, selectedTemplate]);
 
   const uploadImage = useCallback(async (file: File): Promise<{ success: boolean; url?: string; error?: string }> => {
     return new Promise((resolve) => {
@@ -255,7 +278,9 @@ export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, nul
   // Listen for changes from other tabs
   useEffect(() => {
     const handler = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEYS.profile && e.newValue) {
+      if (e.key === STORAGE_KEYS.template && e.newValue) {
+        _setSelectedTemplate(JSON.parse(e.newValue));
+      } else if (e.key === STORAGE_KEYS.profile && e.newValue) {
         _setProfile(JSON.parse(e.newValue));
       } else if (e.key === STORAGE_KEYS.projects && e.newValue) {
         _setProjects(JSON.parse(e.newValue));
@@ -272,6 +297,8 @@ export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, nul
   return (
     <PortfolioDataContext.Provider
       value={{
+        selectedTemplate,
+        setSelectedTemplate,
         profile,
         projects,
         techStack,

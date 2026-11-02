@@ -1,0 +1,201 @@
+/* ============================================================
+   TERMINAL MOTION SYSTEM
+   Everything prints: commands type, output streams line by line,
+   the screen powers on like a CRT. Motion is stepped, never eased.
+   ============================================================ */
+
+/* ---------- Output printing after a command finishes ---------- */
+.tm-output > :not(.tm-cmd) {
+  visibility: hidden;
+}
+.tm-output.is-ready > :not(.tm-cmd) {
+  visibility: visible;
+  animation: tmPrint 0.32s steps(4, end) both;
+}
+.tm-output.is-ready > *:nth-child(2) { animation-delay: 0.07s; }
+.tm-output.is-ready > *:nth-child(3) { animation-delay: 0.14s; }
+.tm-output.is-ready > *:nth-child(4) { animation-delay: 0.21s; }
+.tm-output.is-ready > *:nth-child(5) { animation-delay: 0.28s; }
+.tm-output.is-ready > *:nth-child(6) { animation-delay: 0.35s; }
+.tm-output.is-ready > *:nth-child(n + 7) { animation-delay: 0.42s; }
+
+/* Lists inside an output print row by row */
+.tm-output.is-ready .tm-rows > * {
+  animation: tmPrint 0.28s steps(3, end) both;
+  animation-delay: calc(0.12s + var(--row, 0) * 0.06s);
+}
+
+@keyframes tmPrint {
+  from { clip-path: inset(0 100% 0 0); opacity: 0.4; }
+  to { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+/* Gutter number lights up while its command is running */
+.tm-gutter {
+  transition: color 0s, text-shadow 0s;
+}
+.tm-gutter.is-active {
+  color: #000000;
+  background: #66ff66;
+}
+
+/* Typing caret (single, only on the line being typed) */
+.tm-caret {
+  display: inline-block;
+  width: 0.62em;
+  height: 1.1em;
+  vertical-align: -0.15em;
+  margin-left: 1px;
+  background: #66ff66;
+}
+.tm-caret.is-idle {
+  animation: terminalBlink var(--dp-motion-cursor, 1.2s) steps(1) infinite;
+}
+
+/* ---------- CRT overlay ---------- */
+.tm-crt {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.55) 100%);
+}
+@media (pointer: fine) {
+  .tm-crt {
+    animation: tmFlicker 7s steps(1) infinite;
+  }
+}
+@keyframes tmFlicker {
+  0%, 96%, 100% { opacity: 1; }
+  97% { opacity: 0.75; }
+  98% { opacity: 0.95; }
+}
+.tm-glow {
+  text-shadow: 0 0 6px rgba(102, 255, 102, 0.35);
+}
+
+/* Phosphor colour swaps (applied per region so fixed children keep working) */
+.tm-phosphor-amber {
+  filter: hue-rotate(-78deg) saturate(1.35) brightness(1.05);
+}
+.tm-phosphor-white {
+  filter: grayscale(1) brightness(1.25);
+}
+
+/* ---------- Boot log + CRT power-on ---------- */
+.tm-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #000;
+  color: #58ca58;
+  font-family: var(--dp-typography-face);
+  font-size: clamp(11px, 1.5vw, 14px);
+  line-height: 1.55;
+  padding: 18px clamp(14px, 4vw, 40px);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.tm-boot__ok {
+  color: #66ff66;
+  font-weight: 600;
+}
+.tm-boot__time {
+  color: #255325;
+}
+.tm-boot.is-off {
+  animation: tmPowerOn 0.5s steps(6, end) forwards;
+}
+@keyframes tmPowerOn {
+  0% { transform: scale(1, 1); filter: brightness(1); }
+  45% { transform: scale(1, 0.006); filter: brightness(3); background: #66ff66; }
+  80% { transform: scale(0.004, 0.006); filter: brightness(4); background: #ffffff; }
+  100% { transform: scale(0, 0); opacity: 0; }
+}
+.tm-boot__skip {
+  position: absolute;
+  top: 14px;
+  right: clamp(14px, 4vw, 40px);
+  font-size: 11px;
+  color: #255325;
+}
+
+/* Page warms up as the boot screen collapses */
+.tm-warmup {
+  animation: tmWarm 0.7s steps(5, end) both;
+}
+@keyframes tmWarm {
+  from { filter: brightness(2.2) contrast(1.4); }
+  to { filter: none; }
+}
+
+/* ---------- Interactive shell drawer ---------- */
+.tm-shell {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  height: min(58vh, 480px);
+  background: #000;
+  border-top: 1px solid #66ff66;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--dp-typography-face);
+  animation: tmShellUp 0.22s steps(5, end) both;
+}
+@keyframes tmShellUp {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+.tm-shell__log {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px clamp(12px, 3vw, 32px);
+  font-size: 14px;
+  line-height: 1.55;
+  scrollbar-color: #255325 #000;
+}
+.tm-shell__input {
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: #ffffff;
+  caret-color: #66ff66;
+  font: inherit;
+  flex: 1;
+  min-width: 0;
+}
+.tm-shell-toggle {
+  position: fixed;
+  right: clamp(12px, 3vw, 28px);
+  bottom: clamp(12px, 3vw, 24px);
+  z-index: 80;
+}
+
+/* ---------- Matrix rain easter egg ---------- */
+.tm-matrix {
+  position: fixed;
+  inset: 0;
+  z-index: 85;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tm-output > :not(.tm-cmd) { visibility: visible; }
+  .tm-output.is-ready > :not(.tm-cmd),
+  .tm-output.is-ready .tm-rows > *,
+  .tm-crt,
+  .tm-warmup,
+  .tm-shell,
+  .tm-caret.is-idle {
+    animation: none !important;
+  }
+}

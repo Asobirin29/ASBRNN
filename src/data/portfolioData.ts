@@ -1,9 +1,11 @@
-import type { ProfileData, Project, TechItem, ExperienceItem } from '../types/portfolio';
+import type { ProfileData, Project, TechItem, ExperienceItem, TemplateId } from '../types/portfolio';
+
+export const selectedTemplate: TemplateId = "modern";
 
 export const profileData: ProfileData = {
   "name": "Ahmad Sobirin",
   "tagline": "Full-Stack & Mobile Developer",
-  "education": "Teknik Informatika (S1)",
+  "education": "SISTEM INFORMASI",
   "status": "Available for Engineering Roles & Projects",
   "bio": "Developer yang berfokus pada pembangunan platform web modern, aplikasi mobile, dan arsitektur sistem yang skalabel, efisien, dan andal.",
   "experienceStart": "Active Developer",
@@ -240,63 +242,46 @@ export const techStackData: TechItem[] = [
 
 export const projectsData: Project[] = [
   {
-    "id": "cimart",
-    "title": "CiMart (CibendaMart)",
-    "subtitle": "Rural E-Commerce Platform for Desa Cibenda, Pangandaran",
+    "id": "project-1792807297895",
+    "title": "Proyek Baru",
+    "subtitle": "Deskripsi singkat mengenai proyek ini",
     "category": "fullstack",
-    "summary": "Platform e-commerce desa yang dibangun atas permintaan Wakil Rektor & Prodi untuk memberdayakan transaksi komoditas sembako, hasil tani, ternak, ikan, dan UMKM warga Desa Cibenda.",
-    "description": "Proyek inisiatif digitalisasi desa yang dimandatkan langsung oleh pimpinan kampus bekerjasama dengan perangkat Desa Cibenda. Platform ini menjembatani produsen desa langsung dengan pembeli regional melalui integrasi peta dan pembayaran terotomatisasi.",
+    "summary": "Ringkasan singkat yang menarik tentang fitur utama proyek.",
+    "description": "Penjelasan komprehensif mengenai latar belakang, arsitektur, dan solusi yang diimplementasikan.",
     "architecture": [
-      "Backend monolitik Laravel dengan routing frontend React TypeScript via Inertia.js",
-      "WebSockets untuk sinkronisasi pesanan dan status transaksi real-time",
-      "Firebase Cloud Messaging (FCM) untuk push notification otomatis",
-      "Integrasi Leaflet / OpenStreetMap untuk pemetaan titik pengantaran desa",
-      "Payment gateway Midtrans otomatis dengan otentikasi Google OAuth",
-      "Containerisasi Docker untuk memastikan reliabilitas deployment antar server"
+      "Frontend React + Tailwind",
+      "REST API Backend"
     ],
     "stack": [
-      "Laravel",
-      "Inertia.js",
       "React",
       "TypeScript",
-      "MySQL",
-      "Tailwind CSS",
-      "Docker",
-      "FCM",
-      "WebSockets",
-      "Leaflet / OSM",
-      "Midtrans",
-      "Google OAuth"
+      "Tailwind CSS"
     ],
     "highlights": [
-      "Inisiatif resmi atas penugasan Warek & Prodi Teknik Informatika",
-      "Mendukung komoditas sembako, pertanian, peternakan, perikanan, dan kerajinan",
-      "Sistem pembayaran digital instan dan pemetaan akurat level desa"
+      "Arsitektur modular dan rapi",
+      "Performa cepat dan responsif"
     ],
-    "challenges": "Dikerjakan dan diarsiteki secara mandiri dari nol hingga tahap produksi karena keterbatasan anggota tim.",
-    "role": "Full-Stack Engineer",
-    "demoUrl": "https://cimart.ryhndastra.site",
-    "isPrivateRepo": true,
-    "privateRepoReason": "Repository privat karena hak cipta institusi & kerahasiaan data",
-    "imageUrl": "/projects/CibendaMart.png",
-    "images": [
-      "/projects/CibendaMart.png"
-    ],
+    "challenges": "Tantangan teknis yang dihadapi dan cara menyelesaikannya.",
+    "role": "Full-Stack Developer",
+    "demoUrl": "",
+    "githubUrl": "",
+    "imageUrl": "/avatar.svg",
     "imageFit": "cover",
-    "featured": true,
+    "featured": false,
     "metrics": [
       {
-        "label": "Engineering",
-        "value": "Full-Stack Developer"
+        "label": "Role",
+        "value": "Lead Engineer"
       },
       {
-        "label": "Architecture",
-        "value": "Laravel Inertia"
-      },
-      {
-        "label": "Payment API",
-        "value": "Midtrans Iris"
+        "label": "Platform",
+        "value": "Web / Cloud"
       }
+    ],
+    "isPrivateRepo": true,
+    "isMobileApp": false,
+    "images": [
+      "/avatar.svg"
     ]
   },
   {
@@ -330,9 +315,6 @@ export const projectsData: Project[] = [
     "isMobileApp": true,
     "demoStatusLabel": "Aplikasi Mobile Native (Demo/APK on request)",
     "imageUrl": "/projects/villa.png",
-    "images": [
-      "/projects/villa.png"
-    ],
     "imageFit": "contain",
     "featured": true,
     "metrics": [
@@ -348,6 +330,9 @@ export const projectsData: Project[] = [
         "label": "State & Cloud",
         "value": "Firebase Suite"
       }
+    ],
+    "images": [
+      "/projects/villa.png"
     ]
   },
   {
@@ -385,9 +370,6 @@ export const projectsData: Project[] = [
     "githubUrl": "https://github.com/ryhndastra/kalorin-ai",
     "demoUrl": "https://kalorin-ai.vercel.app",
     "imageUrl": "/projects/kalorinLogo.png",
-    "images": [
-      "/projects/kalorinLogo.png"
-    ],
     "imageFit": "contain",
     "featured": true,
     "metrics": [
@@ -403,16 +385,19 @@ export const projectsData: Project[] = [
         "label": "Web Platform",
         "value": "React & Vite"
       }
+    ],
+    "images": [
+      "/projects/kalorinLogo.png"
     ]
   }
 ];
 
 export const experienceData: ExperienceItem[] = [
   {
-    "id": "edu-widyatama",
+    "id": "edu-widyat",
     "period": "2023 - Sekarang",
-    "role": "S1 Teknik Informatika",
-    "organization": "Universitas Widyatama (Angkatan 2023)",
+    "role": "S1 SISTEM INFORMASI",
+    "organization": "UNIVERSITAS KOMPUTER INDONESIA",
     "badge": "Pendidikan Formal",
     "category": "education",
     "description": "Menempuh studi sarjana Teknik Informatika dengan pendalaman fundamental ilmu komputer, struktur data, algoritma, rekayasa perangkat lunak, dan mengambil penjurusan spesialisasi Database / Data Analyst.",

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { createResizeFilter, onDebouncedResize } from '../../hooks/canvasPerf';
 import {
   renderWaterBody,
   renderSandLayers,
@@ -36,14 +37,15 @@ export const AnimatedOceanSlideBackground: React.FC<AnimatedOceanSlideBackground
     let isVisible = false;
     let time = 0;
 
+    const shouldResize = createResizeFilter();
     const handleResize = () => {
-      if (!canvas) return;
+      if (!canvas || !shouldResize(window.innerWidth, window.innerHeight)) return;
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
+    const stopResize = onDebouncedResize(handleResize);
 
     const render = () => {
       if (!isRunning || !ctx || !canvas || !isVisible) return;
@@ -95,7 +97,7 @@ export const AnimatedOceanSlideBackground: React.FC<AnimatedOceanSlideBackground
     return () => {
       isRunning = false;
       if (animId) cancelAnimationFrame(animId);
-      window.removeEventListener('resize', handleResize);
+      stopResize();
       observer.disconnect();
     };
   }, [depthLevel]);
