@@ -64,8 +64,9 @@ const PortfolioDataContext = createContext<PortfolioDataContextValue | null>(nul
 
 export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedTemplate, _setSelectedTemplate] = useState<TemplateId>(() => {
-    const loaded = loadFromStorage<TemplateId>(STORAGE_KEYS.template, defaultTemplate || 'ocean');
-    return loaded === 'dreamy' ? 'retro' : loaded;
+    const loaded = loadFromStorage<string>(STORAGE_KEYS.template, defaultTemplate || 'ocean');
+    const validTemplates: TemplateId[] = ['ocean', 'modern', 'retro', 'cyber'];
+    return (validTemplates.includes(loaded as TemplateId) ? loaded : (defaultTemplate || 'ocean')) as TemplateId;
   });
   const [profile, _setProfile] = useState<ProfileData>(() =>
     loadFromStorage(STORAGE_KEYS.profile, defaultProfile)
@@ -92,9 +93,8 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [profile?.name, profile?.tagline]);
 
   const setSelectedTemplate = useCallback((tpl: TemplateId) => {
-    const finalTpl = tpl === 'dreamy' ? 'retro' : tpl;
-    _setSelectedTemplate(finalTpl);
-    saveToStorage(STORAGE_KEYS.template, finalTpl);
+    _setSelectedTemplate(tpl);
+    saveToStorage(STORAGE_KEYS.template, tpl);
   }, []);
 
   const setProfile = useCallback((data: ProfileData) => {

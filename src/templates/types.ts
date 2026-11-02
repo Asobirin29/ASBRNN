@@ -6,7 +6,7 @@ export interface TemplateDefinition {
   tagline: string;
   description: string;
   badge: string;
-  category: 'Interactive' | 'Minimalist' | 'Bento Grid' | 'Terminal' | 'Dreamy' | 'Retro';
+  category: 'Interactive' | 'Minimalist' | 'Terminal' | 'Retro';
   accentColor: string;
   previewGradient: string;
   styleTags: string[];
