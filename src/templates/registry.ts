@@ -82,6 +82,44 @@ export const TEMPLATES_REGISTRY: TemplateDefinition[] = [
       'Kursor terminal tunggal berkedip diskrit pada interval 1.2 detik'
     ],
     recommendedFor: 'Full-stack engineer, systems developer, dan profesional yang menginginkan portofolio terminal otentik, presisi, dan terbaca seperti session manual komputasi.'
+  },
+  {
+    id: 'bento',
+    name: 'Bento Grid',
+    tagline: 'Modular Studio, High Density & Modern Card Hierarchy',
+    description: 'Tata letak modular bento modern ala Apple & Linear dengan visual depth gelap elegan, status ketersediaan live, perataan modular terstruktur, dan navigasi studio yang bersih.',
+    badge: 'Modular Bento',
+    category: 'Bento Grid',
+    accentColor: '#6366f1',
+    previewGradient: 'from-indigo-600 via-purple-600 to-slate-900',
+    styleTags: ['Bento Grid', 'Modular Cards', 'Dark Elegance', 'Linear Style', 'Studio Hub'],
+    features: [
+      'Grid modular proporsional dengan hierarki visual terstruktur',
+      'Kartu flagship proyek beresolusi tinggi dengan tag arsitektur',
+      'Live Jakarta WIB time display dan badge ketersediaan interaktif',
+      'Akses instan salin email dan tautan jejaring sosial',
+      'Jejak karir terintegrasi dalam kartu waktu berurutan'
+    ],
+    recommendedFor: 'Software engineer dan UI/UX developer yang menginginkan tampilan modern, terorganisir rapi dalam grid modular yang efisien dan memanjakan mata.'
+  },
+  {
+    id: 'dreamy',
+    name: 'Dreamy Starfield',
+    tagline: 'Midnight Constellations, Polaroid Memory & Cinematic Magic',
+    description: 'Suasana malam berbintang dengan partikel starfield berkilau interaktif, kartu polaroid fotografi vintage, efek klik sparkle berhamburan, dan intro sinematik malam yang hangat.',
+    badge: 'Dreamy & Magic',
+    category: 'Dreamy',
+    accentColor: '#ec4899',
+    previewGradient: 'from-purple-900 via-pink-700 to-slate-950',
+    styleTags: ['Starfield', 'Polaroid', 'Sparkles', 'Cinematic', 'Midnight Glow'],
+    features: [
+      'Kanvas starfield malam interaktif dengan konstelasi berkilau',
+      'Kartu proyek bergaya Polaroid vintage dengan rotasi halus',
+      'Tap-to-sparkle interaktif di seluruh halaman',
+      'Pilihan tampilan Proyek: Carousel 3D atau Grid galeri',
+      'Intro sinematik dengan visual ambient yang memikat'
+    ],
+    recommendedFor: 'Kreator, mobile developer, dan desainer yang menginginkan portofolio hangat, estetik, artistik, dan punya sentuhan personal yang mendalam.'
   }
 ];
 

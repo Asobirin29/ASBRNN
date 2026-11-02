@@ -10,7 +10,8 @@ import {
   ArrowRight,
   HardDrive,
   Info,
-  Monitor
+  Monitor,
+  LayoutGrid
 } from 'lucide-react';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
 import { TEMPLATES_REGISTRY } from '../../templates/registry';
@@ -93,8 +94,10 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
           <div className="w-11 h-11 rounded-xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400 shrink-0">
             {activeTemplateDef.id === 'ocean' && <Waves className="w-5 h-5" />}
             {activeTemplateDef.id === 'modern' && <Layers className="w-5 h-5" />}
-            {(activeTemplateDef.id === 'retro' || activeTemplateDef.id === 'dreamy' || activeTemplateDef.id === 'bento') && <Monitor className="w-5 h-5 text-yellow-300" />}
+            {activeTemplateDef.id === 'retro' && <Monitor className="w-5 h-5 text-yellow-300" />}
             {activeTemplateDef.id === 'cyber' && <Terminal className="w-5 h-5" />}
+            {activeTemplateDef.id === 'bento' && <LayoutGrid className="w-5 h-5 text-indigo-400" />}
+            {activeTemplateDef.id === 'dreamy' && <Sparkles className="w-5 h-5 text-pink-400" />}
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -189,7 +192,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                     </div>
                   )}
 
-                  {(template.id === 'retro' || template.id === 'dreamy' || template.id === 'bento') && (
+                  {template.id === 'retro' && (
                     <div className="h-full bg-[#008080] rounded-lg p-2 flex flex-col justify-between text-black border-2 border-[#808080] relative overflow-hidden select-none">
                       <div className="bg-[#000080] text-white px-1.5 py-0.5 text-[8px] flex items-center justify-between font-bold">
                         <span className="flex items-center gap-1">
@@ -228,6 +231,58 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
                       <div className="flex gap-1 text-[8px]">
                         <span className="bg-emerald-950 px-1 rounded border border-emerald-800">[ $ projects ]</span>
                         <span className="bg-emerald-950 px-1 rounded border border-emerald-800">[ $ skills ]</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {template.id === 'bento' && (
+                    <div className="h-full bg-[#0f172a] rounded-lg p-2 flex flex-col justify-between border border-indigo-900/60 relative overflow-hidden select-none">
+                      <div className="flex items-center justify-between text-[8px]">
+                        <span className="flex items-center gap-1 font-bold text-slate-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                          <span>STUDIO HUB</span>
+                        </span>
+                        <span className="px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 text-[7px] font-semibold">
+                          MODULAR
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-1 my-1">
+                        <div className="col-span-2 bg-[#1e293b] p-1 rounded border border-slate-700/60 flex flex-col justify-between">
+                          <span className="text-[7px] font-bold text-white leading-tight">FLAGSHIP PROJECT</span>
+                          <span className="text-[6px] text-indigo-400">Full-stack App</span>
+                        </div>
+                        <div className="bg-[#1e293b] p-1 rounded border border-slate-700/60 flex flex-col justify-between items-center text-center">
+                          <span className="text-[6px] text-slate-400">STACK</span>
+                          <span className="text-[7px] font-bold text-emerald-400">17+</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-[7px] bg-[#1e293b]/70 px-1.5 py-0.5 rounded border border-slate-700/40">
+                        <span className="text-slate-300">JAKARTA WIB</span>
+                        <span className="text-indigo-400 font-bold">LIVE</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {template.id === 'dreamy' && (
+                    <div className="h-full bg-gradient-to-b from-[#1a0f2e] via-[#0d0718] to-[#05020a] rounded-lg p-2 flex flex-col justify-between border border-pink-900/40 relative overflow-hidden select-none">
+                      <div className="flex items-center justify-between text-[8px]">
+                        <span className="flex items-center gap-1 font-bold text-pink-200">
+                          <span className="text-pink-400">✨</span>
+                          <span>STARFIELD</span>
+                        </span>
+                        <span className="px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 text-[7px] font-semibold">
+                          POLAROID
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-center my-0.5">
+                        <div className="bg-white p-1 pb-2 rounded shadow-md transform -rotate-3 border border-pink-200/50 flex flex-col items-center">
+                          <div className="w-14 h-7 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-sm" />
+                          <span className="text-[6px] text-slate-800 font-serif font-bold mt-0.5">Memories</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-[7px] bg-purple-950/60 px-1.5 py-0.5 rounded border border-purple-800/40">
+                        <span className="text-pink-300">Tap to Sparkle</span>
+                        <span className="text-purple-300 font-serif">★ 3D Carousel</span>
                       </div>
                     </div>
                   )}

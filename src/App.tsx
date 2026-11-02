@@ -4,7 +4,14 @@ import { PortfolioDataProvider, usePortfolioData } from './context/PortfolioData
 import { ThemeProvider } from './context/ThemeContext';
 import { ProjectCaseStudyModal } from './components/projects/ProjectCaseStudyModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
-import { OceanTemplate, ModernTemplate, RetroTemplate, CyberTemplate } from './templates';
+import {
+  OceanTemplate,
+  ModernTemplate,
+  RetroTemplate,
+  CyberTemplate,
+  DreamyTemplate,
+  BentoTemplate,
+} from './templates';
 
 function PortfolioSite() {
   const { selectedTemplate } = usePortfolioData();
@@ -15,9 +22,11 @@ function PortfolioSite() {
       case 'modern':
         return <ModernTemplate onOpenProject={setActiveModalProject} />;
       case 'retro':
-      case 'dreamy':
-      case 'bento':
         return <RetroTemplate onOpenProject={setActiveModalProject} />;
+      case 'dreamy':
+        return <DreamyTemplate onOpenProject={setActiveModalProject} />;
+      case 'bento':
+        return <BentoTemplate onOpenProject={setActiveModalProject} />;
       case 'cyber':
         return <CyberTemplate onOpenProject={setActiveModalProject} />;
       case 'ocean':
