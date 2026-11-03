@@ -18,6 +18,8 @@ import {
 import type { Project } from '../../types/portfolio';
 import { ProjectPreviewPlaceholder } from './ProjectPreviewPlaceholder';
 import { stopLenisScroll, startLenisScroll } from '../../hooks/useLenisSmoothScroll';
+import { usePortfolioData } from '../../context/PortfolioDataContext';
+import { getCaseStudyTheme } from './caseStudyThemes';
 
 interface ProjectCaseStudyModalProps {
   project: Project | null;
@@ -30,6 +32,9 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
   isOpen,
   onClose
 }) => {
+  const { selectedTemplate } = usePortfolioData();
+  const t = getCaseStudyTheme(selectedTemplate);
+
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState(0);
@@ -94,6 +99,7 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
           data-lenis-prevent-wheel="true"
           data-lenis-prevent-touch="true"
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          style={t.fontFamily ? { fontFamily: t.fontFamily } : undefined}
         >
           {/* backdrop overlay */}
           <motion.div
@@ -101,7 +107,7 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm"
+            className={`fixed inset-0 ${t.overlay}`}
           />
 
           {/* modal container */}
@@ -113,24 +119,24 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-4xl bg-[#fffdf5] rounded-2xl sm:rounded-[32px] border-2 sm:border-4 border-[#0f172a] shadow-[6px_6px_0px_#0f172a] sm:shadow-[12px_12px_0px_#0f172a] p-4 sm:p-8 space-y-4 sm:space-y-6 z-10 my-4 sm:my-8 max-h-[92vh] overflow-y-auto"
+            className={`relative w-full max-w-4xl p-4 sm:p-8 space-y-4 sm:space-y-6 z-10 my-4 sm:my-8 max-h-[92vh] overflow-y-auto ${t.container}`}
           >
             {/* modal header and close button */}
-            <div className="flex items-start justify-between gap-3 sm:gap-4 border-b-2 border-[#0f172a]/20 pb-3 sm:pb-4">
+            <div className={`flex items-start justify-between gap-3 sm:gap-4 border-b-2 pb-3 sm:pb-4 ${t.headerDivider}`}>
               <div>
                 <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                  <span className="text-[10px] sm:text-xs font-mono font-black uppercase tracking-wider text-[#0f172a] bg-[#fde047] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg border-2 border-[#0f172a]">
+                  <span className={`text-[10px] sm:text-xs tracking-wider ${t.badge}`}>
                     {project.category === 'fullstack' ? 'FULL-STACK WEB ARCHITECTURE' : 'MOBILE FLUTTER SYSTEM'}
                   </span>
-                  <span className="text-[10px] sm:text-xs font-mono font-bold text-[#64748b]">
+                  <span className={`text-[10px] sm:text-xs ${t.roleText}`}>
                     // {project.role}
                   </span>
                 </div>
 
-                <h3 className="text-xl sm:text-3xl font-black text-[#0f172a] tracking-tight">
+                <h3 className={`text-xl sm:text-3xl ${t.title}`}>
                   {project.title}
                 </h3>
-                <p className="text-xs sm:text-sm font-mono font-bold text-[#0284c7] mt-0.5">
+                <p className={`text-xs sm:text-sm mt-0.5 ${t.subtitle}`}>
                   {project.subtitle}
                 </p>
               </div>
@@ -138,7 +144,7 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-[#fff9d4] hover:bg-[#fee2e2] border-2 border-[#0f172a] text-[#0f172a] hover:text-[#dc2626] shadow-[2px_2px_0px_#0f172a] sm:shadow-[3px_3px_0px_#0f172a] hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none transition-all cursor-pointer shrink-0"
+                className={`p-2 sm:p-2.5 transition-all cursor-pointer shrink-0 ${t.closeBtn}`}
                 aria-label="Tutup studi kasus"
               >
                 <X className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -168,10 +174,8 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
                         key={i}
                         type="button"
                         onClick={() => setActiveImageIdx(i)}
-                        className={`relative shrink-0 w-16 h-11 sm:w-20 sm:h-14 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                          activeImageIdx === i
-                            ? 'border-[#0284c7] ring-2 ring-[#0284c7]/40 shadow-[2px_2px_0px_#0f172a] scale-105'
-                            : 'border-[#0f172a]/30 hover:border-[#0f172a] opacity-65 hover:opacity-100'
+                        className={`relative shrink-0 w-16 h-11 sm:w-20 sm:h-14 overflow-hidden border-2 transition-all cursor-pointer ${
+                          activeImageIdx === i ? t.thumbActive : t.thumbInactive
                         }`}
                         title={`Lihat Screenshot #${i + 1}`}
                       >
@@ -193,7 +197,7 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
                       setLightboxIdx(activeImageIdx);
                       setLightboxOpen(true);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#e0f2fe] hover:bg-[#bae6fd] text-[#0369a1] text-[11px] font-mono font-bold border-2 border-[#0284c7]/50 shadow-[2px_2px_0px_#0f172a] transition-all cursor-pointer ml-auto shrink-0"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] transition-all cursor-pointer ml-auto shrink-0 ${t.enlargeBtn}`}
                     title="Lihat screenshot resolusi penuh"
                   >
                     <Maximize2 className="w-3.5 h-3.5" />
@@ -206,18 +210,24 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
             {/* performance metrics */}
             <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
               {project.metrics.map((m, idx) => {
-                const bg = idx === 0 ? 'bg-[#e0f2fe]' : idx === 1 ? 'bg-[#fef9c3]' : 'bg-[#dcfce7]';
-                const labelColor = idx === 0 ? 'text-[#0369a1]' : idx === 1 ? 'text-[#854d0e]' : 'text-[#15803d]';
-
+                const metricIdx = Math.min(idx, 2) as 0 | 1 | 2;
                 return (
                   <div
                     key={idx}
-                    className={`p-2 sm:p-3.5 rounded-xl sm:rounded-2xl ${bg} border-2 border-[#0f172a] text-center shadow-[2px_2px_0px_#0f172a] sm:shadow-[3px_3px_0px_#0f172a] flex flex-col justify-center`}
+                    className={`p-2 sm:p-3.5 border-2 text-center flex flex-col justify-center ${t.metricBg[metricIdx]} ${
+                      selectedTemplate === 'ocean'
+                        ? 'rounded-xl sm:rounded-2xl border-[#0f172a] shadow-[2px_2px_0px_#0f172a] sm:shadow-[3px_3px_0px_#0f172a]'
+                        : selectedTemplate === 'modern'
+                        ? 'rounded-none border-[#000000] shadow-[2px_2px_0px_#000000] sm:shadow-[3px_3px_0px_#000000]'
+                        : selectedTemplate === 'retro'
+                        ? 'rounded-none retro-bevel-inset'
+                        : 'rounded-none border-[#255325]'
+                    }`}
                   >
-                    <div className={`text-[9px] sm:text-[10px] font-mono font-bold uppercase ${labelColor} leading-tight`}>
+                    <div className={`text-[9px] sm:text-[10px] font-bold uppercase leading-tight ${t.metricLabel[metricIdx]}`}>
                       {m.label}
                     </div>
-                    <div className="text-[11px] sm:text-base font-black text-[#0f172a] mt-0.5 leading-tight break-words">
+                    <div className={`text-[11px] sm:text-base mt-0.5 leading-tight break-words ${t.metricValue}`}>
                       {m.value}
                     </div>
                   </div>
@@ -227,11 +237,11 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
 
             {/* project mandate and overview */}
             <div className="space-y-2">
-              <h4 className="text-[11px] sm:text-xs font-mono uppercase font-black text-[#0f172a] flex items-center gap-2">
-                <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#0284c7]" />
+              <h4 className={`text-[11px] sm:text-xs flex items-center gap-2 ${t.heading}`}>
+                <Layers className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${t.accentIcon}`} />
                 <span>Latar Belakang &amp; Mandat Proyek</span>
               </h4>
-              <p className="text-xs sm:text-base text-[#334155] leading-relaxed bg-[#fff9d4] p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-[#0f172a]/30 font-medium">
+              <p className={`text-xs sm:text-base leading-relaxed p-3.5 sm:p-5 ${t.panel}`}>
                 {project.description}
               </p>
             </div>
@@ -240,11 +250,11 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
             {galleryImages.length > 1 && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-mono uppercase font-black text-[#0f172a] flex items-center gap-2">
-                    <Camera className="w-4 h-4 text-[#0284c7]" />
+                  <h4 className={`text-xs flex items-center gap-2 ${t.heading}`}>
+                    <Camera className={`w-4 h-4 ${t.accentIcon}`} />
                     <span>Galeri &amp; Screenshot Antarmuka Sistem ({galleryImages.length} Foto)</span>
                   </h4>
-                  <span className="text-[11px] font-mono text-[#64748b] font-semibold hidden sm:inline-block">
+                  <span className={`text-[11px] font-semibold hidden sm:inline-block ${t.roleText}`}>
                     Klik foto untuk memperbesar
                   </span>
                 </div>
@@ -257,7 +267,7 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
                         setLightboxIdx(idx);
                         setLightboxOpen(true);
                       }}
-                      className="group/item relative rounded-xl sm:rounded-2xl overflow-hidden border-2 border-[#0f172a] bg-[#0f172a] shadow-[3px_3px_0px_#0f172a] aspect-video cursor-pointer hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                      className={`group/item relative overflow-hidden aspect-video cursor-pointer hover:-translate-y-0.5 active:translate-y-0 transition-all ${t.galleryCard}`}
                     >
                       <img
                         src={img}
@@ -283,17 +293,17 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
 
             {/* architecture and technical execution */}
             <div className="space-y-3">
-              <h4 className="text-xs font-mono uppercase font-black text-[#0f172a] flex items-center gap-2">
-                <Code2 className="w-4 h-4 text-[#0284c7]" />
+              <h4 className={`text-xs flex items-center gap-2 ${t.heading}`}>
+                <Code2 className={`w-4 h-4 ${t.accentIcon}`} />
                 <span>Arsitektur Sistem &amp; Eksekusi Teknis</span>
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {project.architecture.map((item, idx) => (
                   <div
                     key={idx}
-                    className="flex items-start gap-3 p-3.5 rounded-xl bg-[#fff9d4] border border-[#0f172a]/30 text-xs sm:text-sm text-[#0f172a] font-medium"
+                    className={`flex items-start gap-3 p-3.5 text-xs sm:text-sm ${t.archItem}`}
                   >
-                    <CheckCircle2 className="w-4 h-4 text-[#16a34a] shrink-0 mt-0.5" />
+                    <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${t.archIcon}`} />
                     <span className="leading-relaxed">{item}</span>
                   </div>
                 ))}
@@ -302,26 +312,26 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
 
             {/* challenges and resolution */}
             <div className="space-y-2.5">
-              <h4 className="text-xs font-mono uppercase font-black text-[#854d0e] flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-[#ca8a04]" />
+              <h4 className={`text-xs flex items-center gap-2 ${t.heading}`}>
+                <AlertTriangle className={`w-4 h-4 ${t.accentIcon}`} />
                 <span>Tantangan Utama &amp; Resolusi</span>
               </h4>
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#fef9c3] border-2 border-[#0f172a]/30 text-xs sm:text-sm text-[#0f172a] leading-relaxed">
-                <p className="font-black text-[#854d0e] mb-1">Tantangan yang Dihadapi:</p>
-                <p className="text-[#334155] font-medium">{project.challenges}</p>
+              <div className={`p-4 sm:p-5 text-xs sm:text-sm leading-relaxed ${t.challengeWrap}`}>
+                <p className={`mb-1 ${t.challengeTitle}`}>Tantangan yang Dihadapi:</p>
+                <p className={t.challengeBody}>{project.challenges}</p>
               </div>
             </div>
 
             {/* technology stack */}
             <div className="space-y-2.5">
-              <h4 className="text-xs font-mono uppercase font-black text-[#0f172a]">
+              <h4 className={`text-xs ${t.heading}`}>
                 Daftar Stack Teknologi &amp; Protokol
               </h4>
               <div className="flex flex-wrap gap-2">
                 {project.stack.map((tech) => (
                   <span
                     key={tech}
-                    className="text-xs font-mono font-bold px-3 py-1.5 rounded-xl bg-[#fff9d4] text-[#0f172a] border border-[#0f172a]/50"
+                    className={`text-xs px-3 py-1.5 ${t.stackChip}`}
                   >
                     {tech}
                   </span>
@@ -330,15 +340,15 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
             </div>
 
             {/* dialog action buttons */}
-            <div className="pt-6 border-t-2 border-[#0f172a]/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <div className={`pt-6 border-t-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 ${t.headerDivider}`}>
               <div className="flex flex-wrap items-center gap-3">
                 {/* demo status */}
                 {project.isMobileApp ? (
                   <div
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#e0f2fe] text-[#0369a1] text-xs font-mono font-bold border-2 border-[#0284c7]/50 opacity-90 cursor-not-allowed"
+                    className={`flex items-center gap-2 px-4 py-2.5 text-xs ${t.mutedInfo}`}
                     title={project.demoStatusLabel || 'Aplikasi Mobile Native'}
                   >
-                    <Smartphone className="w-4 h-4 text-[#0284c7]" />
+                    <Smartphone className="w-4 h-4" />
                     <span>Aplikasi Mobile Native (Demo/APK on request)</span>
                   </div>
                 ) : project.demoUrl ? (
@@ -346,7 +356,7 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
                     href={project.demoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-mono font-black border-2 border-[#0f172a] shadow-[3px_3px_0px_#0f172a] hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none transition-all"
+                    className={`flex items-center gap-2 px-5 py-2.5 text-xs transition-all ${t.primaryBtn}`}
                   >
                     <ExternalLink className="w-4 h-4" />
                     <span>Kunjungi Live Demo</span>
@@ -356,10 +366,10 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
                 {/* repository button */}
                 {project.isPrivateRepo ? (
                   <div
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#fee2e2] text-[#991b1b] text-xs font-mono font-bold border-2 border-[#991b1b]/40 opacity-90 cursor-not-allowed"
+                    className={`flex items-center gap-2 px-4 py-2.5 text-xs ${t.mutedDanger}`}
                     title="Repository privat"
                   >
-                    <Lock className="w-4 h-4 text-[#dc2626]" />
+                    <Lock className="w-4 h-4" />
                     <span>Repository privat karena hak cipta institusi &amp; kerahasiaan data</span>
                   </div>
                 ) : project.githubUrl ? (
@@ -367,7 +377,7 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
                     href={project.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#fff9d4] hover:bg-[#faeed1] text-[#0f172a] text-xs font-mono font-black border-2 border-[#0f172a] shadow-[3px_3px_0px_#0f172a] hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none transition-all"
+                    className={`flex items-center gap-2 px-4 py-2.5 text-xs transition-all ${t.secondaryBtn}`}
                   >
                     <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                       <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
@@ -380,7 +390,7 @@ export const ProjectCaseStudyModal: React.FC<ProjectCaseStudyModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl bg-[#fffdf5] hover:bg-[#fff9d4] text-[#0f172a] text-xs font-mono font-black border-2 border-[#0f172a] shadow-[3px_3px_0px_#0f172a] hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none transition-all cursor-pointer text-center"
+                className={`px-5 py-2.5 text-xs transition-all cursor-pointer text-center ${t.closeDialogBtn}`}
               >
                 Tutup Dialog
               </button>

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Settings,
   Terminal as TerminalIcon,
   FolderGit2
 } from 'lucide-react';
@@ -9,6 +8,7 @@ import { usePortfolioData } from '../../context/PortfolioDataContext';
 import { useLenisSmoothScroll } from '../../hooks/useLenisSmoothScroll';
 import { shouldPlayIntro } from '../common/motion';
 import { MatrixRain, ScrambleText, TerminalBoot, TerminalShell, TypedCommand } from './TerminalMotion';
+import { TerminalMascot } from './TerminalMascot';
 import { TERMINAL_BOOT_KEY, TerminalLiveContext, useCommandSteps } from './terminalShared';
 import type { ShellLine } from './TerminalMotion';
 import { buildTerminalCommands, COMMAND_DESCRIPTIONS } from './terminalCommands';
@@ -146,6 +146,7 @@ export const CyberTemplate: React.FC<TemplateComponentProps> = ({ onOpenProject 
       )}
       {crt && <div className="tm-crt" aria-hidden="true" />}
       {matrix && <MatrixRain onDone={() => setMatrix(false)} />}
+      {!booting && <TerminalMascot />}
 
       <TerminalShell
         open={shellOpen}
@@ -204,15 +205,6 @@ export const CyberTemplate: React.FC<TemplateComponentProps> = ({ onOpenProject 
                 [05:SOCKET]
               </a>
             </nav>
-
-            <a
-              href="#/admin"
-              className="px-[1.5ch] py-[0.5ch] border border-[#255325] text-[#66ff66] hover:bg-[#66ff66] hover:text-[#000000] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#66ff66] text-[12px] font-medium transition-colors rounded-none flex items-center gap-[0.5ch]"
-              title="Open System Admin (Shortcut: Ctrl+Shift+A)"
-            >
-              <Settings className="w-3.5 h-3.5 text-current" />
-              <span>[ADMIN]</span>
-            </a>
           </div>
         </div>
       </header>
@@ -842,11 +834,6 @@ export const CyberTemplate: React.FC<TemplateComponentProps> = ({ onOpenProject 
               <li>
                 <a href="#socket" className="hover:text-[#66ff66] hover:underline">
                   05. Communication Socket (Email & Social)
-                </a>
-              </li>
-              <li>
-                <a href="#/admin" className="text-[#66ff66] hover:underline">
-                  06. System Administration Console
                 </a>
               </li>
             </ul>

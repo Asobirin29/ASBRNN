@@ -278,6 +278,14 @@
 }
 
 @layer components {
+  .font-modern-display {
+    font-family: var(--bauhaus-typography-face);
+  }
+
+  .font-terminal-mono {
+    font-family: var(--dp-typography-face);
+  }
+
   .font-retro-display {
     font-family: var(--dp-typography-display);
   }
@@ -490,5 +498,72 @@
   .retro-ticker-arrow {
     animation: none !important;
     transform: none !important;
+  }
+}
+
+/* ============================================================
+   TEMPLATE DECORATIONS & PETS (retro cat, bauhaus shapes, terminal cat)
+   ============================================================ */
+
+/* ---- Retro: walking pixel cat ---- */
+@keyframes retroCatWalk {
+  0%   { transform: translateX(-80px) scaleX(1); }
+  48%  { transform: translateX(100vw) scaleX(1); }
+  50%  { transform: translateX(100vw) scaleX(-1); }
+  98%  { transform: translateX(-80px) scaleX(-1); }
+  100% { transform: translateX(-80px) scaleX(1); }
+}
+.retro-cat-walk {
+  left: 0;
+  animation: retroCatWalk 30s linear infinite;
+  will-change: transform;
+}
+@keyframes retroCatLegsA { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes retroCatLegsB { 0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; } }
+.retro-cat-legs-a { animation: retroCatLegsA 0.34s steps(1) infinite; }
+.retro-cat-legs-b { animation: retroCatLegsB 0.34s steps(1) infinite; }
+@keyframes retroCatTail {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1px) rotate(-12deg); }
+}
+.retro-cat-tail { transform-origin: 1px 7px; animation: retroCatTail 0.9s ease-in-out infinite; }
+
+/* ---- Retro: floating desktop stickers ---- */
+@keyframes retroFloat {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-14px) rotate(3deg); }
+}
+.retro-float-slow   { animation: retroFloat 6.5s ease-in-out infinite; }
+.retro-float-slower { animation: retroFloat 9s ease-in-out infinite; }
+
+/* ---- Bauhaus: drifting / spinning primitives ---- */
+@keyframes bauhausDriftA {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(24px, -30px) rotate(8deg); }
+}
+@keyframes bauhausDriftB {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(-26px, 22px) rotate(-10deg); }
+}
+@keyframes bauhausSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.bauhaus-drift-a    { animation: bauhausDriftA 22s ease-in-out infinite; }
+.bauhaus-drift-b    { animation: bauhausDriftB 26s ease-in-out infinite; }
+.bauhaus-spin-slow  { animation: bauhausSpin 44s linear infinite; }
+.bauhaus-spin-slower{ animation: bauhausSpin 70s linear infinite; }
+
+/* ---- Terminal: ASCII cat daemon ---- */
+@keyframes terminalCatOpen  { 0%, 88% { opacity: 1; } 90%, 96% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes terminalCatBlink { 0%, 88% { opacity: 0; } 90%, 96% { opacity: 1; } 100% { opacity: 0; } }
+.terminal-cat-open  { animation: terminalCatOpen 4.5s steps(1) infinite; }
+.terminal-cat-blink { animation: terminalCatBlink 4.5s steps(1) infinite; }
+@keyframes terminalCatCursor { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.terminal-cat-cursor { animation: terminalCatCursor 1.1s steps(1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .retro-cat-walk, .retro-cat-legs-a, .retro-cat-legs-b, .retro-cat-tail,
+  .retro-float-slow, .retro-float-slower,
+  .bauhaus-drift-a, .bauhaus-drift-b, .bauhaus-spin-slow, .bauhaus-spin-slower,
+  .terminal-cat-open, .terminal-cat-blink, .terminal-cat-cursor {
+    animation: none !important;
   }
 }

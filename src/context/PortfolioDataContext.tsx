@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import type { ProfileData, Project, TechItem, ExperienceItem, TemplateId } from '../types/portfolio';
 import {
   selectedTemplate as defaultTemplate,
+  templateRevision as deployedTemplateRevision,
   profileData as defaultProfile,
   projectsData as defaultProjects,
   techStackData as defaultTech,
@@ -14,7 +15,41 @@ const STORAGE_KEYS = {
   techStack: 'portfolio_tech',
   experience: 'portfolio_experience',
   template: 'portfolio_template',
+  templateRev: 'portfolio_template_rev',
 } as const;
+
+const VALID_TEMPLATES: TemplateId[] = ['ocean', 'modern', 'retro', 'cyber'];
+
+/**
+ * Menentukan template awal untuk perangkat ini.
+ *
+ * "Deployment wins": kalau kode yang baru di-deploy punya `templateRevision`
+ * lebih baru daripada yang terakhir dilihat perangkat ini, kita pakai template
+ * dari kode (bukan localStorage lama). Ini yang bikin ganti tema di laptop
+ * (lalu save-to-code + redeploy) ikut ter-update saat dibuka di HP.
+ */
+function resolveInitialTemplate(): TemplateId {
+  const fallback = (VALID_TEMPLATES.includes(defaultTemplate as TemplateId)
+    ? defaultTemplate
+    : 'ocean') as TemplateId;
+  try {
+    const storedRev = Number(localStorage.getItem(STORAGE_KEYS.templateRev) || '0');
+    // Deployment lebih baru daripada yang pernah dilihat perangkat ini → ikuti kode.
+    if (!Number.isFinite(storedRev) || deployedTemplateRevision > storedRev) {
+      localStorage.setItem(STORAGE_KEYS.templateRev, String(deployedTemplateRevision));
+      localStorage.setItem(STORAGE_KEYS.template, JSON.stringify(fallback));
+      return fallback;
+    }
+    const rawTemplate = localStorage.getItem(STORAGE_KEYS.template);
+    if (rawTemplate) {
+      const parsed = JSON.parse(rawTemplate);
+      if (VALID_TEMPLATES.includes(parsed)) return parsed as TemplateId;
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return fallback;
+}
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -66,11 +101,7 @@ interface PortfolioDataContextValue {
 const PortfolioDataContext = createContext<PortfolioDataContextValue | null>(null);
 
 export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [selectedTemplate, _setSelectedTemplate] = useState<TemplateId>(() => {
-    const loaded = loadFromStorage<string>(STORAGE_KEYS.template, defaultTemplate || 'ocean');
-    const validTemplates: TemplateId[] = ['ocean', 'modern', 'retro', 'cyber'];
-    return (validTemplates.includes(loaded as TemplateId) ? loaded : (defaultTemplate || 'ocean')) as TemplateId;
-  });
+  const [selectedTemplate, _setSelectedTemplate] = useState<TemplateId>(resolveInitialTemplate);
   const [profile, _setProfile] = useState<ProfileData>(() =>
     loadFromStorage(STORAGE_KEYS.profile, defaultProfile)
   );
@@ -139,6 +170,8 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
     if (data.selectedTemplate) {
       _setSelectedTemplate(data.selectedTemplate);
       saveToStorage(STORAGE_KEYS.template, data.selectedTemplate);
+      // Tandai perangkat ini sudah sinkron dengan revisi terbaru agar pilihan impor tidak tertimpa.
+      saveToStorage(STORAGE_KEYS.templateRev, deployedTemplateRevision);
     }
     if (data.profile) {
       _setProfile(data.profile);
@@ -173,6 +206,10 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
     return `import type { ProfileData, Project, TechItem, ExperienceItem, TemplateId } from '../types/portfolio';
 
 export const selectedTemplate: TemplateId = ${JSON.stringify(selectedTemplate)};
+
+// Dinaikkan otomatis setiap kali template disimpan permanen ke kode (save-to-code).
+// Dipakai agar perangkat lain (mis. HP) ikut update tema saat deployment terbaru dimuat.
+export const templateRevision = ${Date.now()};
 
 export const profileData: ProfileData = ${JSON.stringify(profile, null, 2)};
 

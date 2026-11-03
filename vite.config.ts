@@ -12,6 +12,10 @@ function generateTsCode(profile: any, projects: any, techStack: any, experience:
 
 export const selectedTemplate: TemplateId = ${JSON.stringify(selectedTemplate)};
 
+// Dinaikkan otomatis setiap kali template disimpan permanen ke kode (save-to-code).
+// Dipakai agar perangkat lain (mis. HP) ikut update tema saat deployment terbaru dimuat.
+export const templateRevision = ${Date.now()};
+
 export const profileData: ProfileData = ${JSON.stringify(profile, null, 2)};
 
 export const techStackData: TechItem[] = ${JSON.stringify(techStack, null, 2)};

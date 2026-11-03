@@ -6,7 +6,6 @@ import {
   ArrowDown,
   Copy,
   Check,
-  Settings,
   Plus,
   Minus,
   User
@@ -19,6 +18,7 @@ import { TechIcon } from '../common/TechIcon';
 import { GithubIcon, LinkedinIcon } from '../common/SocialIcons';
 import { shouldPlayIntro, useRevealOnScroll } from '../common/motion';
 import { BauhausCount, BauhausIntro, BauhausMarquee, BauhausProgress, BauhausTextRing } from './BauhausMotion';
+import { BauhausDecorations } from './BauhausDecorations';
 import { BAUHAUS_INTRO_KEY, useBauhausParallax } from './bauhausShared';
 
 const PLANE_COLORS = ['#ff0000', '#0000ff', '#ffff00'];
@@ -95,6 +95,7 @@ export const ModernTemplate: React.FC<TemplateComponentProps> = ({ onOpenProject
     >
       {showIntro && <BauhausIntro name={profile.name} onDone={() => setShowIntro(false)} />}
       <BauhausProgress />
+      <BauhausDecorations />
 
       {/* Outer Seams Wrapper */}
       <div className="max-w-[1360px] mx-auto border-x-4 border-b-4 border-[#000000] bg-[#f5f4ee] shadow-[12px_12px_0px_#000000]">
@@ -164,14 +165,6 @@ export const ModernTemplate: React.FC<TemplateComponentProps> = ({ onOpenProject
 
             {/* Quick Actions Plane */}
             <div className="flex items-stretch border-t-4 sm:border-t-0 sm:border-l-4 border-[#000000]">
-              <a
-                href="#/admin"
-                className="flex-1 sm:flex-initial px-4 py-3 bg-[#ffff00] text-[#000000] text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 border-r-3 border-[#000000] hover:bg-[#000000] hover:text-[#ffff00] transition-none focus-visible:outline-4 focus-visible:outline-[#000000]"
-                title="Admin Dashboard (Ctrl+Shift+A)"
-              >
-                <Settings className="w-3.5 h-3.5" />
-                <span>Admin</span>
-              </a>
               <a
                 href={`mailto:${profile.contact.email}`}
                 className="flex-1 sm:flex-initial px-5 py-3 bg-[#ff0000] text-[#ffffff] text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 hover:bg-[#000000] hover:text-[#ffffff] transition-none focus-visible:outline-4 focus-visible:outline-[#000000]"
@@ -1164,7 +1157,7 @@ export const ModernTemplate: React.FC<TemplateComponentProps> = ({ onOpenProject
               </div>
             </div>
 
-            {/* Column 2: Quick Directory & Admin Shortcut */}
+            {/* Column 2: Quick Directory */}
             <div className="p-6 sm:p-10 flex flex-col justify-between">
               <div>
                 <span className="text-xs font-black uppercase tracking-wider text-[#000000] block mb-3">
@@ -1192,18 +1185,6 @@ export const ModernTemplate: React.FC<TemplateComponentProps> = ({ onOpenProject
                 </div>
               </div>
 
-              <div className="mt-8 pt-4 border-t-2 border-[#000000] flex items-center justify-between gap-4">
-                <a
-                  href="#/admin"
-                  className="bg-[#ffff00] text-[#000000] border-2 border-[#000000] shadow-[2px_2px_0px_#000000] px-3 py-1.5 text-xs font-black uppercase tracking-wider hover:bg-[#000000] hover:text-[#ffff00] transition-none flex items-center gap-1.5"
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  <span>ADMIN DASHBOARD</span>
-                </a>
-                <span className="text-[11px] font-extrabold uppercase text-[#000000]/60">
-                  CTRL + SHIFT + A
-                </span>
-              </div>
             </div>
 
           </div>

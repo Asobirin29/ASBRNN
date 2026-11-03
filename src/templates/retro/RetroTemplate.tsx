@@ -6,7 +6,6 @@ import {
   HardDrive,
   Monitor,
   Cpu,
-  Settings,
   Mail,
   Copy,
   Check,
@@ -31,6 +30,7 @@ import {
   RetroWindow,
   RetroWindowProvider,
 } from './RetroDesktop';
+import { RetroDesktopPets } from './RetroDesktopPets';
 import { RETRO_BOOT_KEY, useRetroArrange } from './retroShared';
 
 export const RetroTemplate: React.FC<TemplateComponentProps> = (props) => (
@@ -233,6 +233,9 @@ const RetroDesktopView: React.FC<TemplateComponentProps> = ({ onOpenProject }) =
         }}
       />
 
+      {/* ================= DESKTOP PETS & STICKERS ================= */}
+      {!boot && <RetroDesktopPets />}
+
       {/* ================= TOP MENUBAR / TASK RUNNER ================= */}
       <header className="sticky top-0 z-50 bg-[#d4d4d4] border-b-2 border-b-[#808080] border-t-2 border-t-white shadow-[0_2px_4px_rgba(0,0,0,0.4)] px-3 py-1.5 flex items-center justify-between text-xs font-retro-interface">
         <div className="flex items-center gap-2 sm:gap-4">
@@ -287,15 +290,6 @@ const RetroDesktopView: React.FC<TemplateComponentProps> = ({ onOpenProject }) =
 
         {/* Right System Indicators */}
         <div className="flex items-center gap-2">
-          <a
-            href="#/admin"
-            className="retro-key-button text-[11px] px-2 py-1 flex items-center gap-1 font-bold"
-            title="Akses Panel Admin (Ctrl+Shift+A)"
-          >
-            <Settings className="w-3.5 h-3.5 text-black" />
-            <span className="hidden sm:inline">Admin</span>
-          </a>
-
           {/* Clock Inset Well */}
           <div className="retro-bevel-inset bg-white px-2.5 py-0.5 text-[11px] font-retro-mono font-bold flex items-center gap-1.5">
             <Clock className="w-3 h-3 text-[#000080]" />
@@ -1554,14 +1548,6 @@ const RetroDesktopView: React.FC<TemplateComponentProps> = ({ onOpenProject }) =
                 <span>SYSTEM: C:\CONTROL_PANEL</span>
               </div>
               <div className="space-y-2 text-xs">
-                <a
-                  href="#/admin"
-                  className="retro-key-button w-full px-3 py-1.5 text-xs font-bold flex items-center justify-center gap-1.5 bg-[#d4d4d4]"
-                >
-                  <Settings className="w-3.5 h-3.5 text-black" />
-                  <span>Buka Admin Manager (Ctrl+Shift+A)</span>
-                </a>
-
                 <div className="retro-bevel-inset bg-white p-2 text-[10px] font-retro-mono text-black/70">
                   BUILD: RETRO DESKTOP v1.0 • OS ARCH: 12-COL GRID • HARD BEVEL ENGINE
                 </div>
@@ -1646,14 +1632,6 @@ const RetroDesktopView: React.FC<TemplateComponentProps> = ({ onOpenProject }) =
                   <span>Kirim Pesan</span>
                 </a>
                 <div className="border-t border-black/20 my-1" />
-                <a
-                  href="#/admin"
-                  onClick={() => setIsStartMenuOpen(false)}
-                  className="px-3 py-1.5 hover:bg-[#000080] hover:text-white flex items-center gap-2 font-bold"
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  <span>Panel Admin</span>
-                </a>
                 <button
                   type="button"
                   onClick={() => {
