@@ -29,18 +29,34 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
   onSavePermanent,
   isSavingPermanent,
 }) => {
-  const { selectedTemplate, setSelectedTemplate } = usePortfolioData();
+  const { selectedTemplate, setSelectedTemplate, savePermanentToCode } = usePortfolioData();
+  const isLocal = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-  const handleSelectTemplate = (id: TemplateId) => {
+  const handleSelectTemplate = async (id: TemplateId) => {
     setSelectedTemplate(id);
     const tpl = TEMPLATES_REGISTRY.find((t) => t.id === id);
-    showToast(`Template berhasil diubah ke "${tpl?.name || id}"!`, 'success');
+    if (isLocal) {
+      const res = await savePermanentToCode({ selectedTemplate: id });
+      if (res.success) {
+        showToast(`Template diubah ke "${tpl?.name || id}" dan disimpan ke code! Lakukan git push agar live di Vercel & device lain.`, 'success');
+      } else {
+        showToast(`Template aktif di browser lokal. (${res.error || 'Gagal simpan ke file'})`, 'info');
+      }
+    } else {
+      showToast(`Template diubah ke "${tpl?.name || id}" di browser ini. Di Vercel (hosting statis), ganti di dev lokal lalu push ke GitHub agar berubah untuk orang lain.`, 'info');
+    }
   };
 
-  const handleApplyAndPreview = (id: TemplateId) => {
+  const handleApplyAndPreview = async (id: TemplateId) => {
     setSelectedTemplate(id);
     const tpl = TEMPLATES_REGISTRY.find((t) => t.id === id);
-    showToast(`Menerapkan template "${tpl?.name || id}"...`, 'success');
+    if (isLocal) {
+      await savePermanentToCode({ selectedTemplate: id });
+      showToast(`Menerapkan template "${tpl?.name || id}" dan menyimpan ke code...`, 'success');
+    } else {
+      showToast(`Menerapkan template "${tpl?.name || id}" di browser ini...`, 'success');
+    }
     setTimeout(() => {
       onBackToSite();
     }, 400);
@@ -76,7 +92,7 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
               <span>Lihat Web Portofolio</span>
             </button>
             <button
-              onClick={onSavePermanent}
+              onClick={() => onSavePermanent()}
               disabled={isSavingPermanent}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold transition-all shadow-lg shadow-emerald-600/20 cursor-pointer disabled:opacity-50"
             >
@@ -84,6 +100,25 @@ export const TemplateManager: React.FC<TemplateManagerProps> = ({
               <span>{isSavingPermanent ? 'Menyimpan...' : 'Simpan ke File Code'}</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Multi-Device & Vercel Sync Notice */}
+      <div className={`p-4 rounded-2xl border flex items-start gap-3.5 text-xs ${
+        isLocal
+          ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-200'
+          : 'bg-amber-950/30 border-amber-500/40 text-amber-200'
+      }`}>
+        <Info className="w-5 h-5 shrink-0 mt-0.5 text-sky-400" />
+        <div className="space-y-1">
+          <p className="font-bold text-white text-sm">
+            {isLocal ? '🖥️ Dev Lokal Aktif — Auto-Save ke portfolioData.ts Aktif' : '☁️ Vercel Cloud Hosting (Statis)'}
+          </p>
+          <p className="text-slate-300 leading-relaxed">
+            {isLocal
+              ? 'Memilih template di sini otomatis tersimpan ke "src/data/portfolioData.ts". Setelah memilih template atau menghapus proyek yang tidak perlu, jalankan "git push origin main" ke GitHub agar Vercel otomatis me-redeploy dan semua pengunjung di perangkat lain melihat perubahan yang sama.'
+              : 'Anda sedang membuka admin langsung di Vercel. Mengubah template di sini hanya mengubah tampilan di browser perangkat ini (localStorage). Agar perangkat orang lain ikut berubah, ubah template di localhost lalu lakukan git push ke GitHub.'}
+          </p>
         </div>
       </div>
 

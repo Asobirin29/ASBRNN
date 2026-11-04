@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { usePortfolioData } from '../../context/PortfolioDataContext';
 import { TemplateManager } from './TemplateManager';
-import type { ProfileData, Project, TechItem, ExperienceItem } from '../../types/portfolio';
+import type { ProfileData, Project, TechItem, ExperienceItem, TemplateId } from '../../types/portfolio';
 import {
   ArrowLeft, Save, RotateCcw, User, FolderOpen, Cpu, Briefcase,
   Plus, Trash2, ChevronDown, ChevronUp, X, Eye, LogOut,
@@ -731,7 +731,7 @@ const ProjectsEditor: React.FC<{
     const title = data[index]?.title || 'proyek ini';
     if (confirm(`Yakin ingin menghapus ${title}?`)) {
       onChange(data.filter((_, i) => i !== index));
-      showToast('Proyek dihapus');
+      showToast(`Proyek "${title}" dihapus. Klik "Simpan ke File Code" lalu git push agar ter-update di Vercel!`);
     }
   };
 
@@ -1474,7 +1474,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
 
 
   // Handle Permanent Save
-  const handleSavePermanent = async () => {
+  const handleSavePermanent = async (templateOverride?: TemplateId) => {
     setIsSavingPermanent(true);
     // First save all drafts into local storage/context
     setProfile(draftProfile);
@@ -1483,7 +1483,13 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
     setExperience(draftExperience);
 
     try {
-      const res = await savePermanentToCode();
+      const res = await savePermanentToCode({
+        profile: draftProfile,
+        projects: draftProjects,
+        techStack: draftTech,
+        experience: draftExperience,
+        selectedTemplate: templateOverride ?? selectedTemplate,
+      });
       if (res.success) {
         show(res.message || 'Data berhasil disimpan permanen ke src/data/portfolioData.ts!', 'success');
       } else {
@@ -1584,7 +1590,7 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
 
           <div className="flex items-center gap-2">
             <button
-              onClick={handleSavePermanent}
+              onClick={() => handleSavePermanent()}
               disabled={isSavingPermanent}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold transition-all hover:-translate-y-0.5 shadow-md shadow-emerald-600/20 cursor-pointer disabled:opacity-50"
               title={isLocal ? "Simpan data ke src/data/portfolioData.ts" : "Simpan perubahan ke browser (localStorage)"}
@@ -1742,14 +1748,14 @@ export const AdminDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => 
             <TemplateManager
               onBackToSite={onBack}
               showToast={show}
-              onSavePermanent={handleSavePermanent}
+              onSavePermanent={() => handleSavePermanent()}
               isSavingPermanent={isSavingPermanent}
             />
           )}
 
           {activeTab === 'backup' && (
             <BackupAndSyncTab
-              onSavePermanent={handleSavePermanent}
+              onSavePermanent={() => handleSavePermanent()}
               isSavingPermanent={isSavingPermanent}
               onExportJson={handleExportJson}
               onImportJson={handleImportJson}

@@ -21,25 +21,43 @@ const STORAGE_KEYS = {
 const VALID_TEMPLATES: TemplateId[] = ['ocean', 'modern', 'retro', 'cyber'];
 
 /**
- * Menentukan template awal untuk perangkat ini.
+ * Sinkronisasi deployment terbaru ke localStorage perangkat.
  *
  * "Deployment wins": kalau kode yang baru di-deploy punya `templateRevision`
- * lebih baru daripada yang terakhir dilihat perangkat ini, kita pakai template
- * dari kode (bukan localStorage lama). Ini yang bikin ganti tema di laptop
- * (lalu save-to-code + redeploy) ikut ter-update saat dibuka di HP.
+ * lebih baru daripada yang terakhir dilihat perangkat ini, kita pakai data
+ * dari kode deployment (bukan localStorage lama). Ini memastikan ganti template
+ * atau hapus/edit project di komputer lokal (lalu git push ke Vercel) langsung
+ * ter-update otomatis saat dibuka di HP atau perangkat orang lain tanpa tertahan cache lama.
  */
-function resolveInitialTemplate(): TemplateId {
+function initSyncStorage(): boolean {
   const fallback = (VALID_TEMPLATES.includes(defaultTemplate as TemplateId)
     ? defaultTemplate
     : 'ocean') as TemplateId;
   try {
     const storedRev = Number(localStorage.getItem(STORAGE_KEYS.templateRev) || '0');
-    // Deployment lebih baru daripada yang pernah dilihat perangkat ini → ikuti kode.
     if (!Number.isFinite(storedRev) || deployedTemplateRevision > storedRev) {
       localStorage.setItem(STORAGE_KEYS.templateRev, String(deployedTemplateRevision));
       localStorage.setItem(STORAGE_KEYS.template, JSON.stringify(fallback));
-      return fallback;
+      localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(defaultProfile));
+      localStorage.setItem(STORAGE_KEYS.projects, JSON.stringify(defaultProjects));
+      localStorage.setItem(STORAGE_KEYS.techStack, JSON.stringify(defaultTech));
+      localStorage.setItem(STORAGE_KEYS.experience, JSON.stringify(defaultExperience));
+      return true;
     }
+  } catch {
+    // ignore storage errors
+  }
+  return false;
+}
+
+// Jalankan sinkronisasi awal satu kali sebelum React state diinisialisasi
+initSyncStorage();
+
+function resolveInitialTemplate(): TemplateId {
+  const fallback = (VALID_TEMPLATES.includes(defaultTemplate as TemplateId)
+    ? defaultTemplate
+    : 'ocean') as TemplateId;
+  try {
     const rawTemplate = localStorage.getItem(STORAGE_KEYS.template);
     if (rawTemplate) {
       const parsed = JSON.parse(rawTemplate);
@@ -59,7 +77,7 @@ function loadFromStorage<T>(key: string, fallback: T): T {
       if (key === STORAGE_KEYS.profile && parsed?.name === 'Reyhand Astra') {
         return fallback;
       }
-      if (key === STORAGE_KEYS.projects && Array.isArray(parsed) && (parsed.some((p: any) => p.id === 'project-1792807297895') || parsed.length < 26)) {
+      if (key === STORAGE_KEYS.projects && Array.isArray(parsed) && parsed.some((p: any) => p.id === 'project-1792807297895')) {
         return fallback;
       }
       return parsed as T;
@@ -78,6 +96,14 @@ function saveToStorage<T>(key: string, data: T): void {
   }
 }
 
+export interface SaveDataOverrides {
+  profile?: ProfileData;
+  projects?: Project[];
+  techStack?: TechItem[];
+  experience?: ExperienceItem[];
+  selectedTemplate?: TemplateId;
+}
+
 interface PortfolioDataContextValue {
   selectedTemplate: TemplateId;
   setSelectedTemplate: (data: TemplateId) => void;
@@ -93,7 +119,7 @@ interface PortfolioDataContextValue {
   importAllData: (data: { selectedTemplate?: TemplateId; profile?: ProfileData; projects?: Project[]; techStack?: TechItem[]; experience?: ExperienceItem[] }) => void;
   exportAllDataJson: () => string;
   generateTypeScriptCode: () => string;
-  savePermanentToCode: () => Promise<{ success: boolean; message?: string; error?: string }>;
+  savePermanentToCode: (overrides?: SaveDataOverrides) => Promise<{ success: boolean; message?: string; error?: string }>;
   uploadImage: (file: File) => Promise<{ success: boolean; url?: string; error?: string }>;
   uploadMultipleImages: (files: FileList | File[]) => Promise<{ success: boolean; urls: string[]; errors: string[] }>;
 }
@@ -221,15 +247,21 @@ export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, nul
 `;
   }, [selectedTemplate, profile, projects, techStack, experience]);
 
-  const savePermanentToCode = useCallback(async (): Promise<{ success: boolean; message?: string; error?: string }> => {
+  const savePermanentToCode = useCallback(async (overrides?: SaveDataOverrides): Promise<{ success: boolean; message?: string; error?: string }> => {
     const isLocal = typeof window !== 'undefined' &&
       (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+    const targetProfile = overrides?.profile ?? profile;
+    const targetProjects = overrides?.projects ?? projects;
+    const targetTech = overrides?.techStack ?? techStack;
+    const targetExperience = overrides?.experience ?? experience;
+    const targetTemplate = overrides?.selectedTemplate ?? selectedTemplate;
 
     if (!isLocal) {
       // In cloud static hosting (like Vercel), changes are stored in localStorage
       return {
         success: true,
-        message: 'Perubahan berhasil disimpan ke browser (localStorage)! Karena sedang di Vercel (hosting statis), gunakan tab "Simpan & Backup" untuk menyalin kode TypeScript jika ingin meng-update permanen ke repo GitHub.',
+        message: 'Perubahan berhasil disimpan ke browser ini (localStorage)! Karena sedang di Vercel (hosting statis), gunakan local dev (Laragon) lalu tekan "Simpan ke File Code" dan git push ke GitHub agar perubahan aktif untuk semua pengunjung.',
       };
     }
 
@@ -237,11 +269,20 @@ export const experienceData: ExperienceItem[] = ${JSON.stringify(experience, nul
       const res = await fetch('/api/save-portfolio-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profile, projects, techStack, experience, selectedTemplate }),
+        body: JSON.stringify({
+          profile: targetProfile,
+          projects: targetProjects,
+          techStack: targetTech,
+          experience: targetExperience,
+          selectedTemplate: targetTemplate
+        }),
       });
       const text = await res.text();
       try {
         const json = JSON.parse(text);
+        if (json.success) {
+          saveToStorage(STORAGE_KEYS.templateRev, Date.now());
+        }
         return json;
       } catch {
         return { success: false, error: 'Server dev lokal tidak mengembalikan format JSON yang valid.' };

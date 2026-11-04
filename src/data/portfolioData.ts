@@ -4,7 +4,7 @@ export const selectedTemplate: TemplateId = "modern";
 
 // Dinaikkan otomatis setiap kali template disimpan permanen ke kode (save-to-code).
 // Dipakai agar perangkat lain (mis. HP) ikut update tema saat deployment terbaru dimuat.
-export const templateRevision = 1793577600000;
+export const templateRevision = 1793800841060;
 
 export const profileData: ProfileData = {
   "name": "Ahmad Sobirin",
